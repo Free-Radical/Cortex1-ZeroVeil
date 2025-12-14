@@ -1,0 +1,39 @@
+# Claude/AI config files - NEVER COMMIT
+.claude
+.claude/
+
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+secrets/
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Logs
+*.log
+logs/

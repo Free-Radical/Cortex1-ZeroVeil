@@ -1,0 +1,60 @@
+NOTICE
+
+Cortex1-ZeroVeil
+Copyright © 2025 Saqib Ali Khan
+
+Part of the Cortex1 family of privacy-first AI infrastructure.
+
+================================================================================
+PRIOR ART AND DEFENSIVE PUBLICATION
+================================================================================
+
+This repository constitutes a public disclosure and prior art of the
+following techniques, architectures, and system designs:
+
+1. LLM PRIVACY RELAY (MIXER ARCHITECTURE) — Core Product
+   - Multi-tenant prompt aggregation for provider-side anonymity
+   - User-to-prompt correlation breaking at cloud provider level
+   - Shared relay identity obscuring individual request origins
+   - Privacy-preserving batching across tenants
+   - Analogous to Bitcoin mixing for transaction privacy
+
+2. ZERO DATA RETENTION (ZDR) ENFORCEMENT
+   - Mandatory ZDR policy verification for cloud providers
+   - Provider allow-listing based on data retention policies
+   - Audit trail for ZDR compliance without content logging
+
+3. MULTI-TIER MODEL ROUTING
+   - Cost-optimized tiered escalation (cheap → moderate → premium)
+   - Automatic fallback on validation failures
+   - VIP/critical item direct routing to highest tier
+   - Graceful degradation with human review flagging
+
+4. DEVICE-AWARE ROUTING
+   - Automatic hardware capability detection
+   - GPU-capable, CPU-only, and cloud-dominant modes
+   - Local-first processing with intelligent cloud fallback
+
+5. PRIVACY-CORRECT ARCHITECTURE PRINCIPLE
+   - PII/PHI scrubbing must occur locally, before data reaches any relay
+   - Sending raw PII to third parties for scrubbing defeats privacy goals
+   - Content privacy (scrubbing) is user responsibility
+   - Identity privacy (mixing/relay) is ZeroVeil responsibility
+   - Clear separation of trust boundaries
+
+================================================================================
+
+This public disclosure is intended to:
+- Establish priority and prior art for the described techniques
+- Prevent third-party patent claims on these innovations
+- Enable future open-source contribution under stated terms
+
+Date of initial public disclosure: December 2025
+
+================================================================================
+TRADEMARKS
+================================================================================
+
+Cortex1, Cortex1-ZeroVeil, ZeroVeil, "The privacy layer for AI that should have
+existed from day one," and "Switzerland of LLM Privacy" are trademarks of
+Saqib Ali Khan. All rights reserved.

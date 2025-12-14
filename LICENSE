@@ -1,0 +1,33 @@
+Business Source License 1.1
+
+Licensor: Saqib Ali Khan
+Licensed Work: Cortex1-ZeroVeil (including all source code, documentation,
+designs, architecture specifications, and related intellectual property
+contained in this repository)
+
+Additional Use Grant:
+You may use, copy, modify, and redistribute the Licensed Work for
+non-production, non-commercial, research, personal, or evaluation purposes.
+
+You may NOT:
+- Use the Licensed Work in production environments
+- Offer the Licensed Work as a service (SaaS, API, hosted, or managed)
+- Use the Licensed Work for commercial advantage
+- Incorporate the Licensed Work into commercial products
+without explicit written permission from the Licensor.
+
+Change Date: 2030-01-01
+
+Change License: Apache License, Version 2.0
+
+Notice:
+The Licensor reserves the right to shorten the Change Date (but never extend it)
+if sufficient community adoption and responsible governance are achieved.
+
+For licensing inquiries: Saqib.Khan@Me.com
+
+---
+
+Business Source License 1.1 is not an Open Source license. However, the
+Licensed Work will eventually be made available under an Open Source license
+as stated above.
