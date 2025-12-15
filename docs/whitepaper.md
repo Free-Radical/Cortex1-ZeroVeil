@@ -161,6 +161,16 @@ We are implementing periodic evaluation of supported providers to optimize routi
 
 The companion client SDK (cortex1-core) already implements 3-tier cost-optimized model escalation with monthly pricing reviews. This ensures users receive optimal price-performance while maintaining strict privacy requirements.
 
+### Aggregation Benefits
+
+Beyond privacy, the multi-tenant architecture provides economic advantages:
+- Aggregated volume qualifies for better provider pricing tiers
+- Collective buying power enables enterprise rate negotiations
+- Shared infrastructure and compliance costs
+- Centralized benchmarking benefits all users
+
+This creates a network effect: more users → better pricing → lower costs for everyone.
+
 ### Routing: Intelligent Model Selection
 
 Cost and capability optimization:

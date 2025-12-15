@@ -134,6 +134,15 @@ We are implementing periodic reviews of supported LLM providers to optimize rout
 
 The reference client SDK ([cortex1-core](https://github.com/Free-Radical/cortex1-core)) already implements 3-tier cost-optimized escalation with monthly pricing reviews. This approach will be extended to relay-side provider selection to deliver optimal price-performance while maintaining strict ZDR requirements.
 
+**Aggregation Cost Benefits:**
+Beyond privacy, the multi-tenant architecture provides economic advantages:
+- Aggregated request volume qualifies for better provider pricing tiers
+- Collective volume enables negotiation of enterprise rates
+- Infrastructure and compliance costs shared across users
+- Centralized provider benchmarking benefits all users
+
+This creates a network effect: more users → better pricing → lower costs for everyone.
+
 ### 3. Client SDK (Reference Implementation)
 
 ZeroVeil provides a reference client SDK (see [cortex1-core](https://github.com/Free-Radical/cortex1-core)) that handles client-side responsibilities before relay submission:
