@@ -55,9 +55,9 @@ Think about it: sending sensitive data to a third party for "privacy processing"
 
 We handle **identity privacy** (breaking user↔prompt correlation). You handle **content privacy** (removing PII before it leaves your environment).
 
-### What About Scrubbing Tooling?
+### Local Scrubbing Tooling
 
-If demand exists, we may offer scrubbing tools in the future — but they would run **locally in your environment**, not on our servers. We would never ask you to send raw PII to us.
+We provide the [ZeroVeil SDK](https://github.com/Free-Radical/zeroveil-sdk) — a free, open-source toolkit that runs **locally in your environment**, not on our servers. We will never ask you to send raw PII to us.
 
 Anyone offering cloud-based PII scrubbing as a "privacy feature" is asking you to trust them with the very data you're trying to protect. That's not privacy — that's outsourcing risk.
 
@@ -91,6 +91,36 @@ Anyone offering cloud-based PII scrubbing as a "privacy feature" is asking you t
 | Your Local Scrubber | Your own implementation |
 
 We designed this so you trust us with **less**, not more.
+
+---
+
+## Getting Started
+
+### ZeroVeil SDK (Free, Open Source)
+
+Install the client SDK for local PII scrubbing and relay access:
+
+```bash
+pip install zeroveil
+```
+
+**Features:**
+- Local PII/PHI scrubbing via Presidio
+- ZeroVeil relay client
+- Simple API for privacy-preserving LLM interactions
+
+→ [View SDK on GitHub](https://github.com/Free-Radical/zeroveil-sdk)
+
+### ZeroVeil Pro
+
+For organizations requiring advanced data protection:
+
+- Deterministic and non-deterministic scrubbing modes
+- Reversible token mapping (recover original values post-processing)
+- Multiple scrubbing backends (Presidio, regex, scrubadub)
+- Audit logging for compliance
+
+Contact: Saqib.Khan@Me.com for access.
 
 ---
 

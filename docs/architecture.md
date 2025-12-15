@@ -81,14 +81,16 @@ This separation is intentional:
 - Keeps sensitive data in your environment
 - Makes our security posture simpler (we never see raw PII)
 
-### Future Tooling
+### Scrubbing Tooling
 
-If market demand exists, we may provide scrubbing tools — but they would be:
+The [ZeroVeil SDK](https://github.com/Free-Radical/zeroveil-sdk) provides local scrubbing tools:
 - **Local-only**: Runs in your environment
 - **Open source**: Auditable by you
 - **Optional**: Not part of the relay service
 
 We will never ask you to send raw PII to our servers.
+
+For advanced requirements (reversible tokens, multiple backends, audit logging), see ZeroVeil Pro.
 
 ---
 
@@ -132,7 +134,7 @@ We are implementing periodic reviews of supported LLM providers to optimize rout
 - ZDR policy compliance status
 - Reliability and uptime history
 
-The reference client SDK ([cortex1-core](https://github.com/Free-Radical/cortex1-core)) already implements 3-tier cost-optimized escalation with monthly pricing reviews. This approach will be extended to relay-side provider selection to deliver optimal price-performance while maintaining strict ZDR requirements.
+The [ZeroVeil SDK](https://github.com/Free-Radical/zeroveil-sdk) implements 3-tier cost-optimized escalation with monthly pricing reviews. This approach will be extended to relay-side provider selection to deliver optimal price-performance while maintaining strict ZDR requirements.
 
 **Aggregation Benefits:**
 The multi-tenant architecture provides compounding advantages:
@@ -149,9 +151,27 @@ The multi-tenant architecture provides compounding advantages:
 
 This creates a virtuous network effect: more users → stronger anonymity AND lower costs for everyone.
 
-### 3. Client SDK (Reference Implementation)
+### 3. Client SDK
 
-ZeroVeil provides a reference client SDK (see [cortex1-core](https://github.com/Free-Radical/cortex1-core)) that handles client-side responsibilities before relay submission:
+ZeroVeil provides an open-source client SDK for local PII scrubbing and relay access.
+
+**Installation:**
+```bash
+pip install zeroveil
+```
+
+→ [View SDK on GitHub](https://github.com/Free-Radical/zeroveil-sdk)
+
+#### SDK Tiers
+
+| Tier | Distribution | Features |
+|------|--------------|----------|
+| **ZeroVeil SDK** (Free) | `pip install zeroveil` | Presidio-based PII scrubbing, relay client |
+| **ZeroVeil Pro** (Paid) | Private PyPI | Deterministic/non-deterministic modes, reversible token mapping, multiple backends (Presidio, regex, scrubadub), audit logging |
+
+Contact Saqib.Khan@Me.com for Pro tier access.
+
+#### Client-Side Responsibilities
 
 **Device-Aware Routing:**
 | Mode | Hardware | Strategy |
@@ -321,15 +341,15 @@ If ZeroVeil ceases operation:
 - Multi-relay chaining for enhanced anonymity
 - Formal verification of privacy properties (long-term goal, as resources permit)
 - Independent security audits
-- Local-only, open-source scrubbing toolkit (if demand exists)
 - PII/PHI leak detection to identify insufficient or failed data scrubbing before relay
 - Transparency reports (periodic publication of aggregate statistics, legal request counts)
 - Open source roadmap (timeline for code auditability)
 - Federated relay architecture (multiple trusted operators for distributed trust)
+- SDK enhancements: additional scrubbing backends, language support expansion
 
 ---
 
-*Document Version: 1.2*
+*Document Version: 1.3*
 *Date: December 2025*
 *Author: Saqib Ali Khan*
 *Part of the Cortex1 family*
