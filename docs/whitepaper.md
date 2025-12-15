@@ -17,7 +17,7 @@
 
 Large Language Models are being integrated into workflows containing sensitive personal, corporate, and regulated data. While existing solutions address content privacy through PII scrubbing, they fail to address a fundamental problem: **cloud providers can correlate every prompt to a specific user via API keys**, even with "zero data retention" policies.
 
-Cortex1-ZeroVeil introduces a **mixer architecture** for LLM interactions — analogous to Bitcoin mixers for transaction privacy. By aggregating prompts from multiple tenants through a shared relay identity, it breaks user-to-prompt correlation at the provider level.
+Cortex1-ZeroVeil introduces a **mix network architecture** for LLM interactions — applying principles from anonymous communication research (similar in concept to cryptocurrency tumblers) to AI infrastructure. By aggregating prompts from multiple tenants through a shared relay identity, it breaks user-to-prompt correlation at the provider level.
 
 **Critically, we do not offer PII scrubbing as a service.** Sending raw PII to any third party for "privacy processing" defeats the purpose. Users must scrub content locally before it reaches our relay. This separation of concerns — content privacy (user responsibility) vs. identity privacy (ZeroVeil responsibility) — is foundational to our architecture.
 
@@ -68,7 +68,7 @@ User B ─┼─→ [Cortex1-ZeroVeil] ─→ Shared Identity ─→ Cloud Provi
 User C ─┘
 ```
 
-**Analogy:** Bitcoin mixers pool transactions through intermediate wallets, breaking the sender↔receiver link. Cortex1-ZeroVeil pools prompts through a shared relay identity, breaking the user↔prompt link.
+**Analogy:** Mix networks (a concept from anonymous communication research, similar to cryptocurrency tumblers) pool messages through intermediate nodes, breaking the sender↔receiver link. Cortex1-ZeroVeil applies this principle to LLM traffic, pooling prompts through a shared relay identity to break the user↔prompt link.
 
 ### How It Works
 
@@ -150,6 +150,17 @@ Strict Zero Data Retention requirements:
 - Runtime verification where supported
 - Fallback handling for unverified providers
 
+### Optimization: Provider Reviews
+
+We are implementing periodic evaluation of supported providers to optimize routing:
+- Cost efficiency and pricing trends
+- Latency and throughput benchmarks
+- Task-specific performance (coding, analysis, creative tasks)
+- ZDR compliance verification
+- Reliability metrics
+
+The companion client SDK (cortex1-core) already implements 3-tier cost-optimized model escalation with monthly pricing reviews. This ensures users receive optimal price-performance while maintaining strict privacy requirements.
+
 ### Routing: Intelligent Model Selection
 
 Cost and capability optimization:
@@ -163,7 +174,7 @@ Cost and capability optimization:
 
 ### The Gap
 
-The LLM privacy space has seen $1.5B+ in M&A (2024-2025), but no solution offers:
+The data privacy and AI security space has seen significant consolidation, including Veeam's $1.73B acquisition of Securiti AI (2025) and multi-billion dollar PE discussions around market leaders like OneTrust. Yet no solution offers:
 
 | Requirement | Current Market |
 |-------------|----------------|
@@ -265,7 +276,7 @@ Users trade provider trust for relay trust. For many threat models, this is favo
 
 ## Conclusion
 
-Cortex1-ZeroVeil addresses the **identity privacy gap** in LLM usage that no current solution fills. By applying mixer architecture principles from cryptocurrency privacy to AI infrastructure, it enables provider-side anonymity without requiring full self-hosting.
+Cortex1-ZeroVeil addresses the **identity privacy gap** in LLM usage that no current solution fills. By applying mix network principles from anonymous communication research to AI infrastructure, it enables provider-side anonymity without requiring full self-hosting.
 
 Unlike competitors who offer to scrub your PII in the cloud — asking you to trust them with sensitive data before "protecting" it — we take the privacy-correct approach: you handle content privacy locally, we handle identity privacy through aggregation.
 

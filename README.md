@@ -8,7 +8,7 @@ Part of the Cortex1 family of privacy-first AI infrastructure.
 
 ## What Is This?
 
-Cortex1-ZeroVeil is a privacy-preserving relay layer for Large Language Model interactions. It breaks the correlation between users and their prompts at the cloud provider level — similar to how Bitcoin mixers break transaction traceability.
+Cortex1-ZeroVeil is a privacy-preserving relay layer for Large Language Model interactions. It breaks the correlation between users and their prompts at the cloud provider level — applying mix network principles from anonymous communication research (similar in concept to cryptocurrency tumblers).
 
 **The problem:** When you call OpenAI/Anthropic/Google APIs, they know exactly who sent each prompt via your API key. Even with "zero data retention" promises, they see the link.
 
