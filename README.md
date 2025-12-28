@@ -55,9 +55,11 @@ Think about it: sending sensitive data to a third party for "privacy processing"
 
 We handle **identity privacy** (reducing user<->prompt correlation). You handle **content privacy** (removing PII before it leaves your environment).
 
-### Local Scrubbing Tooling
+### Local Scrubbing Tooling (Client-Side)
 
-We provide the [ZeroVeil SDK](https://github.com/Free-Radical/zeroveil-sdk) — a free, source-available toolkit that runs **locally in your environment**, not on our servers. We will never ask you to send raw PII to us.
+ZeroVeil SDK is a local-only client library for PII scrubbing and relay access. It runs **locally in your environment**, not on our servers. We will never ask you to send raw PII to us.
+
+Note: The `zeroveil-sdk` repository is currently **private (invite-only)** during early development. It is intended to become public later.
 
 Anyone offering cloud-based PII scrubbing as a "privacy feature" is asking you to trust them with the very data you're trying to protect. That's not privacy — that's outsourcing risk.
 
@@ -109,7 +111,7 @@ pip install zeroveil
 - ZeroVeil relay client
 - Simple API for privacy-preserving LLM interactions
 
-- [View SDK on GitHub](https://github.com/Free-Radical/zeroveil-sdk)
+- SDK repo: private for now (invite-only)
 
 ### ZeroVeil Pro
 

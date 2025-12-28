@@ -19,6 +19,7 @@ This repository is the **Community Gateway**: the auditable core that enforces p
 - Fine-grained RBAC, per-app policies, change control workflows
 - Compliance reporting and evidence bundles (SOC2/HIPAA/ISO workflows)
 - Signed/immutable audit log integrations and exports
+- Optional PII/PHI **reject-only** ingress checks (detect and reject unsafely-scrubbed requests; never “scrub-as-a-service”)
 - Advanced governance packs and admin UI
 - Security integrations (SIEM, KMS/HSM, key rotation tooling)
 - Advanced abuse resistance / multi-region routing controls
@@ -28,4 +29,3 @@ This repository is the **Community Gateway**: the auditable core that enforces p
 
 - Managed deployment of Pro features with SLAs, monitoring, and incident response
 - Shared upstream credentials (the “relay identity”) operated by ZeroVeil
-

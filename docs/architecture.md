@@ -91,10 +91,12 @@ This separation is intentional:
 
 ### Scrubbing Tooling
 
-The [ZeroVeil SDK](https://github.com/Free-Radical/zeroveil-sdk) provides local scrubbing tools:
+ZeroVeil SDK provides local scrubbing tooling:
 - **Local-only**: Runs in your environment
-- **Open source**: Auditable by you
+- **Auditable**: Designed to be reviewable and testable
 - **Optional**: Not part of the relay service
+
+Note: The `zeroveil-sdk` repository is currently **private (invite-only)** during early development. It is intended to become public later.
 
 We will never ask you to send raw PII to our servers.
 
@@ -153,7 +155,7 @@ We are implementing periodic reviews of supported LLM providers to optimize rout
 - ZDR policy compliance status
 - Reliability and uptime history
 
-The [ZeroVeil SDK](https://github.com/Free-Radical/zeroveil-sdk) implements 3-tier cost-optimized escalation with monthly pricing reviews. This approach will be extended to relay-side provider selection to deliver optimal price-performance while maintaining strict ZDR requirements.
+Planned: tiered, cost-optimized escalation with periodic pricing reviews. This is in active development for the private ZeroVeil Pro line (and later relay-side provider selection) once the core gateway is stable.
 
 **Aggregation Benefits:**
 The multi-tenant architecture provides compounding advantages:
@@ -179,7 +181,7 @@ ZeroVeil provides a source-available client SDK (BSL) for local PII scrubbing an
 pip install zeroveil
 ```
 
-- [View SDK on GitHub](https://github.com/Free-Radical/zeroveil-sdk)
+- SDK repo: private for now (invite-only)
 
 #### SDK Tiers
 

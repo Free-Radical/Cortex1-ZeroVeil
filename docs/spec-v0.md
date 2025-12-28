@@ -124,7 +124,7 @@ Policy is loaded from a JSON file pointed to by `ZEROVEIL_POLICY_PATH` (default:
 ### Notes
 
 - v0 does **not** cryptographically verify scrubbing. It enforces an attestation gate to prevent accidental raw data submission and to support compliance posture.
-- Later versions may add optional server-side **PII-likely reject** heuristics (reject only, never “scrub-as-a-service”).
+- Later versions may add optional server-side **PII/PHI reject-only** checks (detect and reject; never “scrub-as-a-service”). This capability is expected to land in Pro/Hosted first.
 
 ## 3) Logging & Retention Contract (v0)
 

@@ -122,14 +122,16 @@ That's not privacy. That's outsourcing risk while calling it protection.
 3. **Better security posture**: Can't leak what we don't have
 4. **User control**: You choose your scrubbing approach
 
-### Future Tooling
 
-If market demand exists, we may provide scrubbing tools — but they would be:
-- **Local-only**: Runs entirely in your environment
-- **Open source**: Fully auditable
-- **Optional**: Not tied to the relay service
 
 We will never operate a cloud PII scrubbing service.
+
+### Local-Only Scrubbing (Already Available)
+
+Client-side scrubbing exists today:
+
+- **ZeroVeil SDK** (separate repo, currently private invite-only): local-only PII scrubbing using Microsoft Presidio (plus a minimal relay client).
+- **ZeroVeil Pro** (private, in active development): advanced deterministic/non-deterministic scrubbing, reversible token mapping, multiple backends, and audit logging.
 
 ---
 
@@ -159,7 +161,7 @@ We are implementing periodic evaluation of supported providers to optimize routi
 - ZDR compliance verification
 - Reliability metrics
 
-The companion client SDK (cortex1-core) already implements 3-tier cost-optimized model escalation with monthly pricing reviews. This ensures users receive optimal price-performance while maintaining strict privacy requirements.
+Tiered escalation and pricing-review logic are in active development for the private ZeroVeil Pro line (and later relay-side routing), while the ZeroVeil SDK remains intentionally minimal.
 
 ### Aggregation Benefits
 
