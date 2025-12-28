@@ -8,12 +8,20 @@ Cortex1-ZeroVeil is a privacy-preserving relay layer for LLM interactions. Its c
 
 ---
 
+## Implementation Status
+
+- Community gateway (FastAPI) exists as a Week 1 stub implementing the v0 contract: `docs/spec-v0.md`
+- Policy + scrub attestation enforcement are implemented; provider routing is stubbed
+- Community vs Pro boundary is defined in `docs/editions.md`
+
+---
+
 ## Problem Statement
 
 Current LLM API usage has a fundamental privacy flaw:
 
 ```
-User → API Key → Cloud Provider
+User -> API Key -> Cloud Provider
 ```
 
 Even with "zero data retention" promises, the provider knows:
@@ -21,7 +29,7 @@ Even with "zero data retention" promises, the provider knows:
 - Timing and frequency patterns
 - Content of each request (even if not stored long-term)
 
-**Result:** User↔prompt correlation is fully visible to the provider.
+**Result:** User<->prompt correlation is fully visible to the provider.
 
 Existing solutions address content privacy (PII scrubbing) but not **identity privacy** at the provider level.
 
@@ -32,19 +40,19 @@ Existing solutions address content privacy (PII scrubbing) but not **identity pr
 ### Core Concept
 
 ```
-User A ─┐                                    ┌─→ Response A
-User B ─┼─→ [Aggregation Layer] ─→ [Shared Identity] ─→ Cloud ─┼─→ Response B
-User C ─┘                                    └─→ Response C
+User A --->                                ---> Response A
+User B --+--> [Aggregation Layer] ---> [Shared Identity] ---> Cloud --+--> Response B
+User C --->                                ---> Response C
 ```
 
-**Analogy:** Mix networks (a concept from anonymous communication research, similar in principle to cryptocurrency tumblers) break the sender↔receiver link by pooling messages through intermediate nodes. Cortex1-ZeroVeil applies this principle to LLM interactions, breaking the user↔prompt link by pooling requests through a shared relay identity.
+**Analogy:** Mix networks (a concept from anonymous communication research, similar in principle to cryptocurrency tumblers) break the sender<->receiver link by pooling messages through intermediate nodes. Cortex1-ZeroVeil applies this principle to LLM interactions, reducing the user<->prompt linkability by pooling requests through a shared relay identity.
 
 ### Privacy Properties
 
 | Property | Mechanism |
 |----------|-----------|
-| Provider-side anonymity | Single relay identity for all requests |
-| User↔prompt unlinkability | Aggregation breaks correlation |
+| Provider-side correlation resistance | Single relay identity for all requests |
+| User<->prompt unlinkability | Aggregation reduces correlation |
 | Timing obfuscation | Batching windows reduce fingerprinting |
 | Reduced metadata exposure | Shared patterns across tenants |
 
@@ -74,7 +82,7 @@ It doesn't matter if they promise ZDR, encryption, or compliance certifications.
 | Responsibility | Owner | Rationale |
 |----------------|-------|-----------|
 | Content privacy (PII/PHI removal) | User | Your data, your environment, your control |
-| Identity privacy (user↔prompt unlinking) | ZeroVeil | Requires aggregation infrastructure |
+| Identity privacy (user<->prompt unlinking) | ZeroVeil | Requires aggregation infrastructure |
 
 This separation is intentional:
 - Minimizes what you trust us with
@@ -112,6 +120,17 @@ The central mixer component:
 - Request ordering and priority handling
 - Failure isolation (one tenant's error doesn't affect others)
 
+---
+
+## Editions Boundary (Community vs Pro)
+
+This repository is the **Community Gateway**: the auditable enforcement core.
+
+- Community (public, BSL): policy enforcement, routing primitives, metadata-only audit events, and conformance tests.
+- Pro / Hosted (private): enterprise auth, admin UX, compliance reporting, and hardened operations for managed deployments.
+
+See `docs/editions.md` for the canonical split.
+
 ### 2. ZDR Enforcement
 
 Strict Zero Data Retention policy enforcement:
@@ -139,8 +158,8 @@ The [ZeroVeil SDK](https://github.com/Free-Radical/zeroveil-sdk) implements 3-ti
 **Aggregation Benefits:**
 The multi-tenant architecture provides compounding advantages:
 
-*Privacy & Anonymity:*
-- Larger user base = larger anonymity set = stronger privacy guarantees
+*Correlation Resistance (Risk Reduction):*
+- Larger user base = larger "mixing set" -> lower correlation risk (not a guarantee)
 - More traffic = better timing obfuscation through natural batching
 - Diverse usage patterns make individual fingerprinting harder
 
@@ -149,18 +168,18 @@ The multi-tenant architecture provides compounding advantages:
 - Collective buying power enables enterprise rate negotiations
 - Shared infrastructure and compliance costs
 
-This creates a virtuous network effect: more users → stronger anonymity AND lower costs for everyone.
+This creates a virtuous network effect: more users -> stronger mixing set and lower costs for everyone.
 
 ### 3. Client SDK
 
-ZeroVeil provides an open-source client SDK for local PII scrubbing and relay access.
+ZeroVeil provides a source-available client SDK (BSL) for local PII scrubbing and relay access.
 
 **Installation:**
 ```bash
 pip install zeroveil
 ```
 
-→ [View SDK on GitHub](https://github.com/Free-Radical/zeroveil-sdk)
+- [View SDK on GitHub](https://github.com/Free-Radical/zeroveil-sdk)
 
 #### SDK Tiers
 
@@ -187,7 +206,7 @@ Contact Saqib.Khan@Me.com for Pro tier access.
 | Tier 2 | Fallback | Tier 1 failure |
 | Tier 3 | Critical | VIP items or Tier 2 failure |
 
-Tier 3 failure → flag for human review.
+Tier 3 failure -> flag for human review.
 
 *Note: Device detection and local-first routing occur client-side. The relay service handles aggregation and provider routing for cloud-bound requests only.*
 
@@ -195,7 +214,7 @@ Tier 3 failure → flag for human review.
 
 ## Security Model
 
-**Guiding Principle:** We aspire to maximize user privacy and anonymity at all times. When facing design tradeoffs, privacy and anonymity considerations take precedence over convenience, cost optimization, or operational simplicity.
+**Guiding Principle:** We aim to maximize user privacy and reduce correlation risk. This is risk reduction, not a guarantee of anonymity.
 
 ### Threat Mitigation
 
@@ -221,7 +240,7 @@ Tier 3 failure → flag for human review.
 | Category | Policy | Retention | Rationale |
 |----------|--------|-----------|-----------|
 | Prompt/response content | Never persisted | N/A | Core privacy guarantee |
-| User↔request correlation | Not retained beyond session | N/A | Defeats mixer purpose |
+| User<->request correlation | Not retained beyond session | N/A | Defeats mixer purpose |
 | Operational metrics | TBD | TBD | Error rates, latency (aggregate only) |
 | Security events | TBD | TBD | Auth failures, anomalies |
 | Provider routing | TBD | TBD | Which provider handled request (no content) |
@@ -258,7 +277,7 @@ Tier 3 failure → flag for human review.
 
 ### Abuse Prevention
 
-**Challenge:** Preventing abuse while preserving anonymity requires privacy-preserving techniques.
+**Challenge:** Preventing abuse while preserving correlation-resistance goals requires privacy-preserving techniques.
 
 **Approach:**
 - **Rate limiting:** Token-based limits without persistent identity correlation
@@ -318,7 +337,7 @@ Where legally permitted in our operating jurisdictions, we will maintain a regul
 
 ### Incident Response
 
-In the event of a security incident affecting user privacy or anonymity:
+In the event of a security incident affecting user privacy or correlation-risk posture:
 - Users will be notified promptly through published channels
 - Scope and nature of the incident will be disclosed to the extent legally permitted
 - Post-incident analysis will be published
@@ -338,7 +357,7 @@ If ZeroVeil ceases operation:
 
 - Differential privacy for statistical queries
 - Cryptographic mixing protocols (reduce trust requirements)
-- Multi-relay chaining for enhanced anonymity
+- Multi-relay chaining for increased correlation resistance
 - Formal verification of privacy properties (long-term goal, as resources permit)
 - Independent security audits
 - PII/PHI leak detection to identify insufficient or failed data scrubbing before relay

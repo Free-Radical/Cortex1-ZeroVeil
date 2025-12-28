@@ -8,7 +8,7 @@
 
 **Author:** Saqib Ali Khan
 **Date:** December 2025
-**Status:** Early-stage architecture and implementation
+**Status:** Week 1 complete (v0 spec + policy-enforcing FastAPI stub gateway); provider routing is stubbed.
 **Family:** Part of the Cortex1 privacy-first AI infrastructure
 
 ---
@@ -17,7 +17,7 @@
 
 Large Language Models are being integrated into workflows containing sensitive personal, corporate, and regulated data. While existing solutions address content privacy through PII scrubbing, they fail to address a fundamental problem: **cloud providers can correlate every prompt to a specific user via API keys**, even with "zero data retention" policies.
 
-Cortex1-ZeroVeil introduces a **mix network architecture** for LLM interactions — applying principles from anonymous communication research (similar in concept to cryptocurrency tumblers) to AI infrastructure. By aggregating prompts from multiple tenants through a shared relay identity, it breaks user-to-prompt correlation at the provider level.
+Cortex1-ZeroVeil introduces a **mix network architecture** for LLM interactions -- applying principles from anonymous communication research (similar in concept to cryptocurrency tumblers) to AI infrastructure. By aggregating prompts from multiple tenants through a shared relay identity, it reduces user-to-prompt correlation at the provider level (risk reduction, not a guarantee).
 
 **Critically, we do not offer PII scrubbing as a service.** Sending raw PII to any third party for "privacy processing" defeats the purpose. Users must scrub content locally before it reaches our relay. This separation of concerns — content privacy (user responsibility) vs. identity privacy (ZeroVeil responsibility) — is foundational to our architecture.
 
@@ -28,9 +28,9 @@ Cortex1-ZeroVeil introduces a **mix network architecture** for LLM interactions 
 ### Current State
 
 ```
-User A → API Key A → OpenAI
-User B → API Key B → OpenAI
-User C → API Key C → OpenAI
+User A -> API Key A -> OpenAI
+User B -> API Key B -> OpenAI
+User C -> API Key C -> OpenAI
 ```
 
 OpenAI (or any provider) knows exactly who sent each prompt. Even if they:
@@ -44,17 +44,17 @@ They still see the **correlation** in real-time.
 
 1. **Metadata is data**: Who asked what, when, how often
 2. **Legal exposure**: Subpoenas target identifiable records
-3. **Breach risk**: API key leaks expose user↔prompt history
+3. **Breach risk**: API key leaks expose user<->prompt history
 4. **Competitive intelligence**: Providers see what you're building
 
 ### What Existing Solutions Miss
 
 | Solution | Content Privacy | Identity Privacy |
 |----------|-----------------|------------------|
-| PII scrubbing services | ❌ (you send them PII) | ❌ |
-| ZDR APIs | ❌ (still seen in transit) | ❌ |
-| Self-hosting | ✅ | ✅ (but expensive) |
-| **Cortex1-ZeroVeil** | User responsibility | ✅ |
+| PII scrubbing services | No (you send them PII) | No |
+| ZDR APIs | No (still seen in transit) | No |
+| Self-hosting | Yes | Yes (but expensive) |
+| **Cortex1-ZeroVeil** | User responsibility | Targets correlation resistance |
 
 ---
 
@@ -63,12 +63,12 @@ They still see the **correlation** in real-time.
 ### Core Concept
 
 ```
-User A ─┐
-User B ─┼─→ [Cortex1-ZeroVeil] ─→ Shared Identity ─→ Cloud Provider
-User C ─┘
+User A --->
+User B --+--> [Cortex1-ZeroVeil] ---> Shared Identity ---> Cloud Provider
+User C --->
 ```
 
-**Analogy:** Mix networks (a concept from anonymous communication research, similar to cryptocurrency tumblers) pool messages through intermediate nodes, breaking the sender↔receiver link. Cortex1-ZeroVeil applies this principle to LLM traffic, pooling prompts through a shared relay identity to break the user↔prompt link.
+**Analogy:** Mix networks (a concept from anonymous communication research, similar to cryptocurrency tumblers) pool messages through intermediate nodes, breaking the sender<->receiver link. Cortex1-ZeroVeil applies this principle to LLM traffic, pooling prompts through a shared relay identity to reduce the user<->prompt linkability.
 
 ### How It Works
 
@@ -113,7 +113,7 @@ That's not privacy. That's outsourcing risk while calling it protection.
 | Responsibility | Owner | Why |
 |----------------|-------|-----|
 | Content privacy (PII/PHI scrubbing) | User | Your data never leaves your environment |
-| Identity privacy (user↔prompt unlinking) | ZeroVeil | Requires multi-tenant aggregation infrastructure |
+| Identity privacy (user<->prompt unlinking) | ZeroVeil | Requires multi-tenant aggregation infrastructure |
 
 ### Benefits of This Separation
 
@@ -165,8 +165,8 @@ The companion client SDK (cortex1-core) already implements 3-tier cost-optimized
 
 The multi-tenant architecture provides compounding advantages:
 
-*Privacy & Anonymity:*
-- Larger user base = larger anonymity set = stronger privacy
+*Correlation Resistance (Risk Reduction):*
+- Larger user base = larger "mixing set" -> lower correlation risk (not a guarantee)
 - More traffic = better timing obfuscation
 - Diverse patterns make individual fingerprinting harder
 
@@ -175,13 +175,13 @@ The multi-tenant architecture provides compounding advantages:
 - Collective buying power enables enterprise rate negotiations
 - Shared infrastructure and compliance costs
 
-This creates a virtuous network effect: more users → stronger anonymity AND lower costs for everyone.
+This creates a virtuous network effect: more users -> stronger mixing set and lower costs for everyone.
 
 ### Routing: Intelligent Model Selection
 
 Cost and capability optimization:
 - Device-aware (GPU, CPU, cloud modes)
-- Tiered escalation (cheap → moderate → premium)
+- Tiered escalation (cheap -> moderate -> premium)
 - Local-first when hardware permits
 
 ---
@@ -195,7 +195,7 @@ The data privacy and AI security space has seen significant consolidation, inclu
 | Requirement | Current Market |
 |-------------|----------------|
 | Provider-neutral | Partial (some tools) |
-| Provider-side anonymity | **Nobody** |
+| Provider-side correlation resistance | **Nobody (as a mainstream default)** |
 | Privacy-correct architecture | **Nobody** (most offer cloud scrubbing) |
 | Honest about trust tradeoffs | Rare |
 
@@ -216,7 +216,7 @@ The data privacy and AI security space has seen significant consolidation, inclu
 ### Enterprise
 
 - Aggregate employee LLM usage through corporate relay
-- Break individual↔prompt correlation for compliance
+- Reduce individual<->prompt correlation for compliance
 - Unified ZDR enforcement across providers
 - Keep PII scrubbing internal (as it should be)
 
@@ -255,7 +255,7 @@ The data privacy and AI security space has seen significant consolidation, inclu
 
 ### What This Protects Against
 
-- Provider-side user↔prompt correlation
+- Provider-side user<->prompt correlation
 - API key breach exposing user history
 - Metadata accumulation at provider
 
@@ -292,7 +292,7 @@ Users trade provider trust for relay trust. For many threat models, this is favo
 
 ## Conclusion
 
-Cortex1-ZeroVeil addresses the **identity privacy gap** in LLM usage that no current solution fills. By applying mix network principles from anonymous communication research to AI infrastructure, it enables provider-side anonymity without requiring full self-hosting.
+Cortex1-ZeroVeil addresses the **identity privacy gap** in LLM usage that no current solution fills. By applying mix network principles from anonymous communication research to AI infrastructure, it targets provider-side correlation resistance without requiring full self-hosting.
 
 Unlike competitors who offer to scrub your PII in the cloud — asking you to trust them with sensitive data before "protecting" it — we take the privacy-correct approach: you handle content privacy locally, we handle identity privacy through aggregation.
 

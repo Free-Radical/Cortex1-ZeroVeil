@@ -19,15 +19,15 @@ Cortex1-ZeroVeil is a privacy-preserving relay layer for Large Language Model in
 ## Core Product: Privacy Relay (Mixer)
 
 ```
-User A ─┐
-User B ─┼─→ [Cortex1-ZeroVeil] ─→ Shared Identity ─→ Cloud LLM
-User C ─┘
+User A --->
+User B --+--> [Cortex1-ZeroVeil] ---> Shared Identity ---> Cloud LLM
+User C --->
 ```
 
 **What it does:**
 - Aggregates prompts from multiple users/tenants
 - Routes through shared relay identity
-- Breaks user↔prompt correlation at provider level
+- Breaks user<->prompt correlation at provider level
 - Enforces Zero Data Retention (ZDR) provider policies
 
 **What it does NOT do:**
@@ -53,11 +53,11 @@ Think about it: sending sensitive data to a third party for "privacy processing"
 | 2. Send scrubbed content | To ZeroVeil | You |
 | 3. Anonymize & relay | ZeroVeil | Us |
 
-We handle **identity privacy** (breaking user↔prompt correlation). You handle **content privacy** (removing PII before it leaves your environment).
+We handle **identity privacy** (reducing user<->prompt correlation). You handle **content privacy** (removing PII before it leaves your environment).
 
 ### Local Scrubbing Tooling
 
-We provide the [ZeroVeil SDK](https://github.com/Free-Radical/zeroveil-sdk) — a free, open-source toolkit that runs **locally in your environment**, not on our servers. We will never ask you to send raw PII to us.
+We provide the [ZeroVeil SDK](https://github.com/Free-Radical/zeroveil-sdk) — a free, source-available toolkit that runs **locally in your environment**, not on our servers. We will never ask you to send raw PII to us.
 
 Anyone offering cloud-based PII scrubbing as a "privacy feature" is asking you to trust them with the very data you're trying to protect. That's not privacy — that's outsourcing risk.
 
@@ -71,7 +71,7 @@ Anyone offering cloud-based PII scrubbing as a "privacy feature" is asking you t
 
 ### Intelligent Routing
 - Device-aware: GPU, CPU-only, or cloud-dominant modes
-- Cost-optimized: Tiered escalation (cheap → moderate → premium)
+- Cost-optimized: Tiered escalation (cheap -> moderate -> premium)
 - Graceful degradation: Failures flag for human review
 
 ### Local-First Option
@@ -109,7 +109,7 @@ pip install zeroveil
 - ZeroVeil relay client
 - Simple API for privacy-preserving LLM interactions
 
-→ [View SDK on GitHub](https://github.com/Free-Radical/zeroveil-sdk)
+- [View SDK on GitHub](https://github.com/Free-Radical/zeroveil-sdk)
 
 ### ZeroVeil Pro
 
@@ -126,16 +126,38 @@ Contact: Saqib.Khan@Me.com for access.
 
 ## Status
 
-Early-stage architecture and implementation.
+Week 1 complete: v0 spec + policy enforcement stub gateway (FastAPI). Provider routing is stubbed; policy and logging contracts are implemented and test-covered.
+
+---
+
+## Week 1: Gateway Spec + Skeleton
+
+The community gateway is defined by `docs/spec-v0.md` and includes a minimal FastAPI stub implementation.
+
+- Spec (API/policy/logging): `docs/spec-v0.md`
+- Editions (Community vs Pro): `docs/editions.md`
+- Example policy: `policies/default.json`
+- FastAPI stub: `src/zeroveil_gateway/app.py` (returns `stubbed_response`)
+
+Local run (dev):
+
+```bash
+python -m pip install -e .[dev]
+set ZEROVEIL_POLICY_PATH=policies/default.json
+python -m zeroveil_gateway
+python scripts/demo_gateway.py
+```
 
 ---
 
 ## Contributing
 
 Looking for contributors interested in privacy-first AI infrastructure. If you care about:
-- LLM privacy and anonymity
+- LLM privacy and correlation risk reduction
 - Zero-trust architecture
 - Building the missing privacy layer for AI
+
+See `CONTRIBUTING.md` and `CLA.md`.
 
 Open an issue or reach out: Saqib.Khan@Me.com
 

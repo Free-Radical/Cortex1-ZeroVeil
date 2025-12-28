@@ -1,0 +1,17 @@
+{
+  "version": "0",
+  "enforce_zdr_only": true,
+  "require_scrubbed_attestation": true,
+  "allowed_providers": ["openrouter"],
+  "allowed_models": ["*"],
+  "limits": {
+    "max_messages": 50,
+    "max_chars_per_message": 16000
+  },
+  "logging": {
+    "mode": "metadata_only",
+    "sink": "jsonl",
+    "path": "logs/audit.jsonl"
+  }
+}
+
