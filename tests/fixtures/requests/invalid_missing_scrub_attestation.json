@@ -1,0 +1,6 @@
+{
+  "messages": [{"role": "user", "content": "hello"}],
+  "zdr_only": true,
+  "metadata": {"scrubbed": false}
+}
+

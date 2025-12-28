@@ -5,6 +5,7 @@ import time
 import uuid
 
 from fastapi import FastAPI, Header, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from zeroveil_gateway.audit import AuditEvent, AuditLogger
@@ -42,6 +43,19 @@ def create_app() -> FastAPI:
             status_code=exc.http_status,
             content=ErrorResponse(
                 error=ErrorBody(code=exc.code, message=exc.message, details=exc.details),
+            ).model_dump(),
+        )
+
+    @app.exception_handler(RequestValidationError)
+    def handle_validation_error(_request, exc: RequestValidationError):  # type: ignore[no-untyped-def]
+        return JSONResponse(
+            status_code=400,
+            content=ErrorResponse(
+                error=ErrorBody(
+                    code="invalid_request",
+                    message="Invalid request body",
+                    details={"errors": exc.errors()},
+                )
             ).model_dump(),
         )
 
