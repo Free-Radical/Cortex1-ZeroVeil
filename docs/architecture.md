@@ -155,7 +155,7 @@ We are implementing periodic reviews of supported LLM providers to optimize rout
 - ZDR policy compliance status
 - Reliability and uptime history
 
-Planned: tiered, cost-optimized escalation with periodic pricing reviews. This is in active development for the private ZeroVeil Pro line (and later relay-side provider selection) once the core gateway is stable.
+Tier escalation and automated pricing/cost policy are **Pro/Hosted** responsibilities. The Community gateway stays conservative and auditable; it provides policy enforcement and provider adapter primitives.
 
 **Aggregation Benefits:**
 The multi-tenant architecture provides compounding advantages:
@@ -201,14 +201,8 @@ Contact Saqib.Khan@Me.com for Pro tier access.
 | HYBRID | CPU (16GB+ RAM) | Local preprocessing, relay for complex tasks |
 | CLOUD_ONLY | Minimal | Relay with mandatory local PII scrubbing |
 
-**Cost-Optimized Escalation (when using relay):**
-| Tier | Purpose | Trigger |
-|------|---------|---------|
-| Tier 1 | Default | Initial attempt (~80% of requests) |
-| Tier 2 | Fallback | Tier 1 failure |
-| Tier 3 | Critical | VIP items or Tier 2 failure |
-
-Tier 3 failure -> flag for human review.
+**Pro/Hosted routing policy:**
+- Tier escalation and cost-optimized routing (if used) are Pro/Hosted features and should not be required to adopt the Community gateway.
 
 *Note: Device detection and local-first routing occur client-side. The relay service handles aggregation and provider routing for cloud-bound requests only.*
 

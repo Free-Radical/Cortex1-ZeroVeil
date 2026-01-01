@@ -161,7 +161,7 @@ We are implementing periodic evaluation of supported providers to optimize routi
 - ZDR compliance verification
 - Reliability metrics
 
-Tiered escalation and pricing-review logic are in active development for the private ZeroVeil Pro line (and later relay-side routing), while the ZeroVeil SDK remains intentionally minimal.
+Tier escalation and pricing/cost policy are **Pro/Hosted** features; the Community gateway remains conservative and auditable, and the ZeroVeil SDK remains intentionally minimal.
 
 ### Aggregation Benefits
 
@@ -179,12 +179,10 @@ The multi-tenant architecture provides compounding advantages:
 
 This creates a virtuous network effect: more users -> stronger mixing set and lower costs for everyone.
 
-### Routing: Intelligent Model Selection
+### Routing
 
-Cost and capability optimization:
-- Device-aware (GPU, CPU, cloud modes)
-- Tiered escalation (cheap -> moderate -> premium)
-- Local-first when hardware permits
+- Device-aware local-first routing can be done client-side.
+- Tier escalation and automated cost/pricing policy are Pro/Hosted features.
 
 ---
 

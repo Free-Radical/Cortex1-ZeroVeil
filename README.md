@@ -71,10 +71,10 @@ Anyone offering cloud-based PII scrubbing as a "privacy feature" is asking you t
 - Only routes to providers with verified Zero Data Retention policies
 - Provider allow-list maintained and auditable
 
-### Intelligent Routing
-- Device-aware: GPU, CPU-only, or cloud-dominant modes
-- Cost-optimized: Tiered escalation (cheap -> moderate -> premium)
-- Graceful degradation: Failures flag for human review
+### Routing (Best practices)
+
+- Community gateway: enforce policy and provide provider adapters; keep routing logic conservative and auditable.
+- Pro/Hosted: advanced routing policy (e.g., tier escalation and automated cost/pricing controls) lives in Pro.
 
 ### Local-First Option
 - Prefer local models when hardware permits

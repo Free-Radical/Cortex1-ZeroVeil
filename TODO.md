@@ -1,6 +1,13 @@
-# Cortex1-ZeroVeil - Core TODO
+# Cortex1-ZeroVeil - Community Gateway Plan (Weekly)
 
-This file tracks engineering execution priorities for the Community Gateway (this repo).
+This file tracks the **weekly execution plan** for the **Community Gateway** (this repo).
+
+## Best practices (edition boundary)
+
+- Community is for **proving core value with minimal trust + minimal ops**:
+  - an auditable policy gateway + relay primitives, safe defaults, and a working reference integration
+- Pro/Hosted is for **advanced features** that expand trust/compliance/ops surface:
+  - tier escalation, automated cost/pricing policy, enterprise auth/RBAC, compliance exports, signed logs, hosted relay identity at scale
 
 ## Week 1 (Done)
 
@@ -31,14 +38,15 @@ This file tracks engineering execution priorities for the Community Gateway (thi
 
 ## Week 5 (Relay Identity / Mixing v0)
 
-- Shared upstream identity implementation (single upstream key)
-- Per-tenant isolation controls (rate limiting, quotas, failure isolation)
-- Optional small batching window (latency-controlled), behind config
+## Week 5 (Mixer v0 primitives — self-hosted)
 
-## Week 6 (Compliance Telemetry)
+- Community scope: define and ship **minimal** mixer primitives suitable for self-hosting (e.g., a single upstream identity for an org and optional small batching window), behind config.
+- Pro/Hosted scope: operate the shared upstream credentials (“relay identity”) and multi-tenant mixing at scale with stronger isolation and abuse controls.
 
-- Audit exports (metadata-only) + signed log option (Pro later)
-- Operational metrics without content (latency, token counts, errors)
+## Week 6 (Operational telemetry — metadata-only)
+
+- Community: operational metrics without content (latency, token counts if available, error rates).
+- Pro/Hosted: compliance exports and signed/immutable logs (see `docs/editions.md`).
 
 ## Week 7 (Showcase Integration)
 
@@ -54,4 +62,3 @@ This file tracks engineering execution priorities for the Community Gateway (thi
 
 - Current intent: keep `zeroveil-sdk` repo private (invite-only) during early development.
 - TODO: When ready for broad adoption, make `zeroveil-sdk` public and update docs/links in this repo accordingly.
-
