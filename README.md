@@ -98,7 +98,7 @@ We designed this so you trust us with **less**, not more.
 
 ## Getting Started
 
-### ZeroVeil SDK (Free, Open Source)
+### ZeroVeil SDK (Free, Source-Available)
 
 Install the client SDK for local PII scrubbing and relay access:
 

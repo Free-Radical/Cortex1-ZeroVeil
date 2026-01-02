@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cortex1-zeroveil-gateway"
-version = "0.0.0"
+version = "0.1.0a1"
 description = "ZeroVeil community gateway (FastAPI) - policy-enforced ZDR relay stub."
 requires-python = ">=3.11"
 dependencies = [
