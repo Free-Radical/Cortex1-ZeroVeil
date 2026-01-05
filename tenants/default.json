@@ -1,0 +1,13 @@
+{
+  "tenants": [
+    {
+      "tenant_id": "default",
+      "api_key_hashes": [
+        "0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "rate_limit_rpm": 60,
+      "rate_limit_tpd": 100000,
+      "enabled": true
+    }
+  ]
+}

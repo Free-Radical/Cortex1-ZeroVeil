@@ -11,7 +11,15 @@
   "logging": {
     "mode": "metadata_only",
     "sink": "jsonl",
-    "path": "logs/audit.jsonl"
+    "path": "logs/audit.jsonl",
+    "retention": {
+      "max_size_mb": 100,
+      "max_age_days": 30,
+      "rotate_count": 5
+    }
+  },
+  "pii_gate": {
+    "enabled": true,
+    "patterns": ["ssn", "credit_card", "email", "phone", "ip_address"]
   }
 }
-

@@ -1,6 +1,15 @@
-# Local config
-.claude/
-.private/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Build artifacts
+dist/
+build/
+.pytest_cache/
 
 # Environment and secrets
 .env
@@ -8,6 +17,10 @@
 *.key
 *.pem
 secrets/
+
+# Logs (runtime logs, not source)
+logs/
+*.log
 
 # IDE/Editor
 .vscode/
@@ -20,21 +33,24 @@ secrets/
 .DS_Store
 Thumbs.db
 
-# Node
-node_modules/
-
-# Python
-__pycache__/
-*.pyc
-.venv/
-venv/
-
-# Build artifacts
-dist/
-build/
-*.egg-info/
-
-# Logs
-*.log
-logs/
+# AI tool configurations (CRITICAL - never commit)
+CLAUDE.md
+.ai_attribution_whitelist
+.claude/
+.cursor/
+.copilot/
+.codeium/
+.tabnine/
+.continue/
+.aider*
+.ai/
 .aiconfig
+
+# Local/private files
+.private/
+PERSONAL-*.md
+*.bak.*
+
+# Test artifacts
+qa_visual_regression/
+tests/fixtures/visual_baselines/

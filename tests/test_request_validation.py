@@ -4,10 +4,15 @@ import pytest
 from fastapi.testclient import TestClient
 
 from zeroveil_gateway.app import create_app
+from zeroveil_gateway.pii import PIIDetectorConfig
 from zeroveil_gateway.policy import Policy
 
 
-def make_policy(*, allowed_models: list[str] | None = None) -> Policy:
+def make_policy(
+    *,
+    allowed_models: list[str] | None = None,
+    pii_gate: PIIDetectorConfig | None = None,
+) -> Policy:
     return Policy(
         version="0",
         enforce_zdr_only=True,
@@ -19,6 +24,7 @@ def make_policy(*, allowed_models: list[str] | None = None) -> Policy:
         logging_mode="metadata_only",
         logging_sink="stdout",
         logging_path=None,
+        pii_gate=pii_gate if pii_gate is not None else PIIDetectorConfig(),
     )
 
 
@@ -239,3 +245,126 @@ def test_zdr_only_false_rejected_when_enforced(monkeypatch: pytest.MonkeyPatch) 
     body = resp.json()
     assert body["error"]["code"] == "policy_denied"
     assert body["error"]["details"]["field"] == "zdr_only"
+
+
+# --- PII Gate Tests ---
+
+
+def test_pii_gate_disabled_allows_pii(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that PII gate disabled allows content with PII patterns."""
+    pii_config = PIIDetectorConfig(enabled=False)
+    client = make_client(monkeypatch, policy=make_policy(pii_gate=pii_config))
+    resp = client.post(
+        "/v1/chat/completions",
+        json={
+            "messages": [{"role": "user", "content": "My SSN is 123-45-6789"}],
+            "metadata": {"scrubbed": True},
+        },
+    )
+    assert resp.status_code == 200
+
+
+def test_pii_gate_enabled_rejects_ssn(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that PII gate enabled rejects SSN patterns."""
+    pii_config = PIIDetectorConfig(enabled=True, patterns=frozenset({"ssn"}))
+    client = make_client(monkeypatch, policy=make_policy(pii_gate=pii_config))
+    resp = client.post(
+        "/v1/chat/completions",
+        json={
+            "messages": [{"role": "user", "content": "My SSN is 123-45-6789"}],
+            "metadata": {"scrubbed": True},
+        },
+    )
+    assert resp.status_code == 403
+    body = resp.json()
+    assert body["error"]["code"] == "pii_detected"
+    assert "unscrubbed PII" in body["error"]["message"]
+    assert body["error"]["details"]["detected_types"] == ["ssn"]
+
+
+def test_pii_gate_enabled_rejects_credit_card(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that PII gate enabled rejects credit card patterns."""
+    pii_config = PIIDetectorConfig(enabled=True, patterns=frozenset({"credit_card"}))
+    client = make_client(monkeypatch, policy=make_policy(pii_gate=pii_config))
+    resp = client.post(
+        "/v1/chat/completions",
+        json={
+            "messages": [{"role": "user", "content": "Card: 1234-5678-9012-3456"}],
+            "metadata": {"scrubbed": True},
+        },
+    )
+    assert resp.status_code == 403
+    body = resp.json()
+    assert body["error"]["code"] == "pii_detected"
+    assert body["error"]["details"]["detected_types"] == ["credit_card"]
+
+
+def test_pii_gate_enabled_allows_clean_content(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that PII gate enabled allows content without PII."""
+    pii_config = PIIDetectorConfig(enabled=True, patterns=frozenset({"ssn", "credit_card"}))
+    client = make_client(monkeypatch, policy=make_policy(pii_gate=pii_config))
+    resp = client.post(
+        "/v1/chat/completions",
+        json={
+            "messages": [{"role": "user", "content": "Hello, how are you?"}],
+            "metadata": {"scrubbed": True},
+        },
+    )
+    assert resp.status_code == 200
+
+
+def test_pii_gate_reports_correct_message_index(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that PII gate reports the correct message index."""
+    pii_config = PIIDetectorConfig(enabled=True, patterns=frozenset({"ssn"}))
+    client = make_client(monkeypatch, policy=make_policy(pii_gate=pii_config))
+    resp = client.post(
+        "/v1/chat/completions",
+        json={
+            "messages": [
+                {"role": "user", "content": "Clean message"},
+                {"role": "user", "content": "SSN: 123-45-6789"},  # PII in second message
+            ],
+            "metadata": {"scrubbed": True},
+        },
+    )
+    assert resp.status_code == 403
+    body = resp.json()
+    assert body["error"]["code"] == "pii_detected"
+    assert body["error"]["details"]["field"] == "messages[1].content"
+
+
+def test_pii_gate_does_not_log_actual_pii(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that PII gate response does not leak the actual PII content."""
+    pii_config = PIIDetectorConfig(enabled=True, patterns=frozenset({"ssn"}))
+    client = make_client(monkeypatch, policy=make_policy(pii_gate=pii_config))
+    secret_ssn = "999-88-7777"
+    resp = client.post(
+        "/v1/chat/completions",
+        json={
+            "messages": [{"role": "user", "content": f"My SSN is {secret_ssn}"}],
+            "metadata": {"scrubbed": True},
+        },
+    )
+    assert resp.status_code == 403
+    # Verify the actual SSN is NOT in the response
+    import json
+    response_text = json.dumps(resp.json())
+    assert secret_ssn not in response_text
+
+
+def test_pii_gate_multiple_types_detected(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that PII gate reports multiple detected types."""
+    pii_config = PIIDetectorConfig(enabled=True, patterns=frozenset({"ssn", "credit_card"}))
+    client = make_client(monkeypatch, policy=make_policy(pii_gate=pii_config))
+    resp = client.post(
+        "/v1/chat/completions",
+        json={
+            "messages": [{"role": "user", "content": "SSN: 123-45-6789 Card: 1234-5678-9012-3456"}],
+            "metadata": {"scrubbed": True},
+        },
+    )
+    assert resp.status_code == 403
+    body = resp.json()
+    assert body["error"]["code"] == "pii_detected"
+    detected = set(body["error"]["details"]["detected_types"])
+    assert detected == {"ssn", "credit_card"}

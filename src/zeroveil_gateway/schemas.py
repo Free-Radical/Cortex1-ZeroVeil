@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
+
+
+ChatRole = Literal["system", "user", "assistant", "tool", "function"]
+ALLOWED_ROLES: tuple[ChatRole, ...] = ("system", "user", "assistant", "tool", "function")
 
 
 class ErrorBody(BaseModel):
@@ -15,7 +21,7 @@ class ErrorResponse(BaseModel):
 
 class ChatMessage(BaseModel):
     role: str
-    content: str
+    content: str | None
 
 
 class RequestMetadata(BaseModel):
@@ -32,7 +38,7 @@ class ChatCompletionsRequest(BaseModel):
 
 
 class ChoiceMessage(BaseModel):
-    role: str
+    role: ChatRole
     content: str
 
 
@@ -55,4 +61,3 @@ class ChatCompletionsResponse(BaseModel):
     model: str
     choices: list[Choice]
     usage: Usage
-
