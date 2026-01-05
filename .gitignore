@@ -35,6 +35,9 @@ Thumbs.db
 
 # AI tool configurations (CRITICAL - never commit)
 CLAUDE.md
+CLAUDE.*.md
+scripts/check_ai_attribution.py
+scripts/install_hooks.py
 .ai_attribution_whitelist
 .claude/
 .cursor/
