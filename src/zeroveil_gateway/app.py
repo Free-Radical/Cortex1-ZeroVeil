@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from zeroveil_gateway.audit import AuditEvent, AuditLogger
 from zeroveil_gateway.pii import PIIDetector
 from zeroveil_gateway.policy import Policy
+from zeroveil_gateway.providers import OpenRouterProvider, ProviderAdapter, ProviderError
 from zeroveil_gateway.schemas import (
     ALLOWED_ROLES,
     ChatCompletionsRequest,
@@ -22,6 +23,27 @@ from zeroveil_gateway.schemas import (
     Usage,
 )
 from zeroveil_gateway.tenants import TenantRegistry
+
+
+def _create_provider(provider_name: str) -> ProviderAdapter | None:
+    """Create a provider adapter by name.
+
+    Args:
+        provider_name: Provider name from policy (e.g., "openrouter").
+
+    Returns:
+        ProviderAdapter instance, or None if in stub mode.
+
+    Raises:
+        ValueError: If provider is not supported.
+    """
+    # Stub mode for testing - return None to use stubbed responses
+    if os.getenv("ZEROVEIL_STUB_MODE", "").lower() in ("1", "true", "yes"):
+        return None
+
+    if provider_name == "openrouter":
+        return OpenRouterProvider()
+    raise ValueError(f"Unsupported provider: {provider_name}")
 
 
 class GatewayError(Exception):
@@ -229,9 +251,72 @@ def create_app() -> FastAPI:
                     http=400,
                 )
 
-        # Provider/model routing is stubbed in v0 (Week 1).
-        selected_provider = policy.allowed_providers[0]
-        selected_model = req.model or "stub"
+        # Provider/model routing - route to actual LLM provider
+        selected_provider_name = policy.allowed_providers[0]
+
+        try:
+            provider = _create_provider(selected_provider_name)
+        except ValueError as e:
+            deny(
+                "provider_error",
+                str(e),
+                {"provider": selected_provider_name},
+                http=500,
+            )
+            raise  # unreachable, but helps type checker
+
+        # Stub mode (for testing) - return stubbed response without calling provider
+        if provider is None:
+            selected_model = req.model or "stub"
+            content = "stubbed_response"
+            prompt_tokens = 0
+            completion_tokens = 0
+            total_tokens = 0
+            finish_reason = "stop"
+        else:
+            # Convert messages to provider format
+            messages_for_provider = [
+                {"role": msg.role, "content": msg.content or ""}
+                for msg in req.messages
+            ]
+
+            # Call the actual LLM provider
+            try:
+                provider_response = provider.chat_completions(
+                    messages=messages_for_provider,
+                    model=req.model,
+                )
+                selected_model = provider_response.model
+                content = provider_response.content
+                prompt_tokens = provider_response.prompt_tokens
+                completion_tokens = provider_response.completion_tokens
+                total_tokens = provider_response.total_tokens
+                finish_reason = provider_response.finish_reason
+
+            except ProviderError as e:
+                # Log provider error and return 502 Bad Gateway
+                audit.log(
+                    AuditEvent.now(
+                        request_id=request_id,
+                        tenant_id=tenant_id,
+                        action="provider_error",
+                        reason=str(e),
+                        provider=selected_provider_name,
+                        model=req.model,
+                        message_count=len(req.messages),
+                        total_chars=sum(len(m.content or "") for m in req.messages),
+                        zdr_only=bool(req.zdr_only),
+                        scrubbed_attested=bool(req.metadata.scrubbed),
+                        latency_ms=int((time.time() - started) * 1000),
+                        extra={"error_details": e.details, "status_code": e.status_code},
+                    )
+                )
+                raise GatewayError(
+                    http_status=e.status_code or 502,
+                    code="provider_error",
+                    message=f"LLM provider error: {e}",
+                    details=e.details,
+                ) from e
 
         audit.log(
             AuditEvent.now(
@@ -239,14 +324,18 @@ def create_app() -> FastAPI:
                 tenant_id=tenant_id,
                 action="allow",
                 reason="ok",
-                provider=selected_provider,
+                provider=selected_provider_name,
                 model=selected_model,
                 message_count=len(req.messages),
-                total_chars=sum(len(m.content) for m in req.messages),
+                total_chars=sum(len(m.content or "") for m in req.messages),
                 zdr_only=bool(req.zdr_only),
                 scrubbed_attested=bool(req.metadata.scrubbed),
                 latency_ms=int((time.time() - started) * 1000),
-                extra={"policy_version": policy.version},
+                extra={
+                    "policy_version": policy.version,
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": completion_tokens,
+                },
             )
         )
 
@@ -267,14 +356,18 @@ def create_app() -> FastAPI:
             choices=[
                 Choice(
                     index=0,
-                    message=ChoiceMessage(role="assistant", content="stubbed_response"),
-                    finish_reason="stop",
+                    message=ChoiceMessage(role="assistant", content=content),
+                    finish_reason=finish_reason,
                 )
             ],
-            usage=Usage(prompt_tokens=0, completion_tokens=0, total_tokens=0),
+            usage=Usage(
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                total_tokens=total_tokens,
+            ),
         )
 
-        # Record token usage for rate limiting (v0: stubbed at 0)
+        # Record token usage for rate limiting
         if registry is not None and authenticated_tenant is not None:
             registry.record_usage(tenant_id, resp.usage.total_tokens)
 
