@@ -56,17 +56,19 @@ OpenAI-style response shape (minimal).
   "id": "zv_...",
   "object": "chat.completion",
   "created": 1730000000,
-  "model": "stub",
+  "model": "meta-llama/llama-3.1-8b-instruct",
   "choices": [
     {
       "index": 0,
-      "message": {"role": "assistant", "content": "stubbed_response"},
+      "message": {"role": "assistant", "content": "Hello! How can I help you?"},
       "finish_reason": "stop"
     }
   ],
-  "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+  "usage": {"prompt_tokens": 15, "completion_tokens": 8, "total_tokens": 23}
 }
 ```
+
+**Phase 0 (current):** Gateway calls actual LLM providers (OpenRouter by default). Token usage reflects real API consumption. Set `ZEROVEIL_STUB_MODE=1` for stubbed responses in tests.
 
 #### Error model (v0)
 
@@ -123,8 +125,47 @@ Policy is loaded from a JSON file pointed to by `ZEROVEIL_POLICY_PATH` (default:
 
 ### Notes
 
-- v0 does **not** cryptographically verify scrubbing. It enforces an attestation gate to prevent accidental raw data submission and to support compliance posture.
-- Later versions may add optional server-side **PII/PHI reject-only** checks (detect and reject; never “scrub-as-a-service”). This capability is expected to land in Pro/Hosted first.
+**FAILSAFE DESIGN (NON-NEGOTIABLE):**
+- **PII scanning is ALWAYS ON.** The gateway scans every request for PII patterns. No bypass, no exceptions.
+- `require_scrubbed_attestation` controls whether the client must send `metadata.scrubbed=true` header — but **attestation never bypasses scanning**. If a client attests "I scrubbed" and we still detect PII, we block and log `attestation_mismatch`.
+- Attestation is logged for audit evidence, not trusted as security control.
+- See `docs/threat-model.md` for full failsafe design philosophy.
+
+### Corporate Gateway Mode (v1)
+
+For enterprise DLP deployments, use `mode: corporate_gateway`:
+
+```json
+{
+  "version": "1",
+  "mode": "corporate_gateway",
+  "require_scrubbed_attestation": false,
+  "pii_rejection": {
+    "enabled": true,
+    "sensitivity": "high"
+  },
+  "allowed_models": ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo", "claude-3-*"],
+  "blocked_models": ["*-32k"],
+  "limits": {
+    "max_requests_per_minute": 60,
+    "max_tokens_per_day": 1000000
+  },
+  "content_policy": {
+    "require_system_preamble": true,
+    "system_preamble": "You are a helpful assistant for Acme Corp.",
+    "blocked_keywords": ["confidential", "internal only"]
+  }
+}
+```
+
+**Key differences from default mode:**
+- `require_scrubbed_attestation: false` — clients don't need to send attestation header (simpler integration)
+- **PII scanning still happens** — gateway always scans, regardless of attestation setting
+- Model allowlist/blocklist with glob pattern support
+- Optional content policy (system preamble injection, keyword blocking)
+- Per-tenant rate and cost limits
+
+This enables drop-in deployment where applications only change `OPENAI_API_BASE`.
 
 ## 3) Logging & Retention Contract (v0)
 
@@ -137,10 +178,10 @@ Default intent: **no prompt/response content logging**.
 - auth result (success/failure)
 - tenant id (v0: `default`)
 - policy decision (allowed/denied + reason code)
-- selected provider/model (v0 stubbed)
+- selected provider/model (Phase 0: actual provider calls)
 - request sizes (message count, character counts)
 - latency
-- token counts if provided by upstream (v0: zeros)
+- token counts from provider (Phase 0: actual usage from OpenRouter)
 
 ### What the gateway MUST NOT log by default
 
