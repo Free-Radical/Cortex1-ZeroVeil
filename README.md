@@ -245,7 +245,7 @@ We designed this so you trust us with **less**, not more.
 
 ```bash
 # Install
-pip install zeroveil
+pip install cortex1-zeroveil-community
 
 # Configure
 export ZEROVEIL_UPSTREAM_URL="https://api.openai.com/v1"
