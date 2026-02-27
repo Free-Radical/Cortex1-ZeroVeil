@@ -57,3 +57,4 @@ PERSONAL-*.md
 # Test artifacts
 qa_visual_regression/
 tests/fixtures/visual_baselines/
+.coverage

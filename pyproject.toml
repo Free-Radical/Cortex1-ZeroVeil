@@ -3,9 +3,9 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cortex1-zeroveil-gateway"
+name = "cortex1-zeroveil-community"
 version = "0.1.0a1"
-description = "ZeroVeil community gateway (FastAPI) - policy-enforced ZDR relay stub."
+description = "DLP Controls for Any LLM API - for developers building regulated apps and enterprise IT teams. PII rejection, audit logging, and provider-side correlation resistance."
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115",

@@ -238,7 +238,7 @@ Application-level decision to skip LLM entirely for spam.
 
 1. **Create provider abstraction (shared):**
    ```
-   src/zeroveil_gateway/providers/
+   src/zeroveil_community/providers/
    ├── base.py              # ProviderAdapter interface
    ├── openrouter.py        # OpenRouter implementation
    └── ollama.py            # Ollama implementation
@@ -253,7 +253,7 @@ Application-level decision to skip LLM entirely for spam.
 
 1. **Create Pro-only tier routing module:**
    ```
-   src/zeroveil_gateway/pro/
+   src/zeroveil_community/pro/
    ├── __init__.py          # Edition check, feature flags
    ├── tier_routing.py      # TierConfig, EscalationPolicy, route_request()
    ├── validation.py        # Output validation patterns
@@ -340,7 +340,7 @@ Application-level decision to skip LLM entirely for spam.
 1. **Test Community edition:**
    ```bash
    # Run ZeroVeil Community locally
-   cd cortex1-zeroveil && uvicorn zeroveil_gateway.app:create_app --port 8080
+   cd cortex1-zeroveil && uvicorn zeroveil_community.app:create_app --port 8080
 
    # Configure cortex1-core
    ZEROVEIL_GATEWAY_URL=http://localhost:8080
@@ -355,7 +355,7 @@ Application-level decision to skip LLM entirely for spam.
 2. **Test Pro edition:**
    ```bash
    # Run ZeroVeil Pro locally
-   ZEROVEIL_EDITION=pro uvicorn zeroveil_gateway.app:create_app --port 8080
+   ZEROVEIL_EDITION=pro uvicorn zeroveil_community.app:create_app --port 8080
    ```
 
    **Verify Pro:**
@@ -463,7 +463,7 @@ X-ZeroVeil-Needs-Human-Review: false
 ## Files to Create in ZeroVeil
 
 ```
-src/zeroveil_gateway/
+src/zeroveil_community/
 ├── providers/               # SHARED (Community + Pro)
 │   ├── __init__.py
 │   ├── base.py              # NEW: Provider interface

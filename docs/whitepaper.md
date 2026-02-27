@@ -1,31 +1,92 @@
 # Cortex1-ZeroVeil
 
-**Zero Data Retention LLM Privacy Relay**
+**DLP Controls for Any LLM API**
 
-*A Multi-Tenant Mixer Architecture for Provider-Side Anonymity*
+*For Developers Building Regulated Apps and Enterprise IT Teams*
 
 ---
 
 **Author:** Saqib Ali Khan
 **Date:** December 2025
-**Status:** Week 1 complete (v0 spec + policy-enforcing FastAPI stub gateway); provider routing is stubbed.
+**Status:** Week 2 complete. `IMPLEMENTED_NOW` DLP gateway controls; `PLANNED_COMMUNITY` mixer primitives targeted for Week 5.
 **Family:** Part of the Cortex1 privacy-first AI infrastructure
 
 ---
 
 ## Abstract
 
-Large Language Models are being integrated into workflows containing sensitive personal, corporate, and regulated data. While existing solutions address content privacy through PII scrubbing, they fail to address a fundamental problem: **cloud providers can correlate every prompt to a specific user via API keys**, even with "zero data retention" policies.
+LLM API calls leak sensitive data. Whether you're a developer building a healthcare app or an IT team controlling employee AI access, adding DLP controls today means:
 
-Cortex1-ZeroVeil introduces a **mix network architecture** for LLM interactions -- applying principles from anonymous communication research (similar in concept to cryptocurrency tumblers) to AI infrastructure. By aggregating prompts from multiple tenants through a shared relay identity, it reduces user-to-prompt correlation at the provider level (risk reduction, not a guarantee).
+- Building your own PII detection logic
+- Paying enterprise prices for enterprise gateways
+- Cobbling together open-source toolkits without compliance artifacts
+- Trusting cloud scrubbing services with your raw data
 
-**Critically, we do not offer PII scrubbing as a service.** Sending raw PII to any third party for "privacy processing" defeats the purpose. Instead, we provide an open-source client-side SDK for local scrubbing—your data never leaves your environment. Users must scrub content locally before it reaches our relay. This separation of concerns—content privacy (your responsibility, with our tooling) vs. identity privacy (ZeroVeil's responsibility)—is foundational to our architecture.
+**ZeroVeil is different.** An OpenAI-compatible proxy that adds DLP controls to any LLM endpoint—with one line of code.
+
+```python
+# Add DLP to your app
+client = OpenAI(base_url="https://your-zeroveil/v1")
+```
+
+**What makes ZeroVeil unique:**
+
+1. **We reject PII, we don't scrub it.** If you send us data to "clean," you've already exposed it. ZeroVeil detects PII patterns and blocks the request—your sensitive data never leaves your environment.
+
+2. **Provider-side correlation resistance (`PLANNED_COMMUNITY`).** Mixer architecture is the planned path for reducing provider-side correlation risk; current builds focus on DLP enforcement.
+
+3. **Works with any OpenAI-compatible endpoint.** Direct providers (OpenAI, Anthropic), aggregators (OpenRouter, Together AI), or self-hosted models (vLLM, Ollama).
+
+---
+
+**Status labels used in this document**
+- `IMPLEMENTED_NOW`: Available in current Community releases
+- `PLANNED_COMMUNITY`: On Community roadmap, not implemented yet
+- `PRO_ONLY`: Available only in Pro
 
 ---
 
 ## The Problem Nobody Is Solving
 
-### Current State
+### For Developers Building Regulated Apps
+
+You're building an app that calls LLM APIs and handles PHI, PII, or PCI data. How do you add DLP today?
+
+| Option | Problem |
+|--------|---------|
+| Build your own | Time, expertise, ongoing maintenance |
+| Enterprise gateways (Kong, Securiti) | Enterprise pricing, enterprise sales cycle |
+| Open-source toolkits (LiteLLM + Presidio) | No compliance artifacts, DIY audit logging |
+| Cloud scrubbing (Strac, Private AI) | You send them your PII first—defeats the purpose |
+| Provider guardrails (Bedrock, Model Armor) | Single-provider lock-in |
+
+**The gap:** A developer-friendly, provider-agnostic proxy with compliance-ready features.
+
+### For Enterprise IT / Security Teams
+
+Employees are pasting everything into AI chatbots—the same things they used to paste into search engines, plus far worse:
+
+- Corporate emails, business plans, proposals, RFP responses
+- Confidential legal agreements, M&A documents, board presentations
+- Proprietary source code, API keys, database credentials
+- Financial spreadsheets: quarterly numbers, salary data with names, revenue forecasts
+- Customer PII, patient records, internal org charts
+
+Companies are responding with blanket bans:
+
+| Company | Action | Reason |
+|---------|--------|--------|
+| Samsung | Banned ChatGPT | Source code leaked to ChatGPT |
+| Apple | Restricted use | Confidential information concerns |
+| Verizon | Blocked from corporate systems | Customer data / source code risk |
+| Deutsche Bank | Blocked website | Data leakage protection |
+| Microsoft | Temporarily blocked | Security and data concerns |
+
+**The gap:** A middle path—controlled access with DLP enforcement, not blanket bans.
+
+### The Correlation Problem (Both Audiences)
+
+Even with "zero data retention" promises, every LLM API call exposes identity:
 
 ```
 User A -> API Key A -> OpenAI
@@ -33,294 +94,239 @@ User B -> API Key B -> OpenAI
 User C -> API Key C -> OpenAI
 ```
 
-OpenAI (or any provider) knows exactly who sent each prompt. Even if they:
-- Don't train on your data
-- Delete it after 30 days
-- Offer "zero data retention" APIs
+Provider sees exactly who sent each prompt. This creates:
+- **Legal exposure**: Subpoenas target identifiable records
+- **Breach risk**: API key leaks expose user-to-prompt history
+- **Competitive intelligence**: Providers see what you're building
 
-They still see the **correlation** in real-time.
-
-### Why This Matters
-
-1. **Metadata is data**: Who asked what, when, how often
-2. **Legal exposure**: Subpoenas target identifiable records
-3. **Breach risk**: API key leaks expose user<->prompt history
-4. **Competitive intelligence**: Providers see what you're building
-
-### What Existing Solutions Miss
-
-| Solution | Content Privacy | Identity Privacy |
-|----------|-----------------|------------------|
-| PII scrubbing services | No (you send them PII) | No |
-| ZDR APIs | No (still seen in transit) | No |
-| Self-hosting | Yes | Yes (but expensive) |
-| **Cortex1-ZeroVeil** | User responsibility | Targets correlation resistance |
+**No existing solution addresses this in current mainstream gateways.** Competitors focus on content privacy (scrubbing). ZeroVeil's planned mixer adds an identity-privacy layer.
 
 ---
 
-## The Solution: Mixer Architecture
+## The Solution: ZeroVeil
 
-### Core Concept
+### For Developers
+
+Add DLP controls to your regulated app with one endpoint change:
+
+```python
+from openai import OpenAI
+
+# Before: Direct to provider
+client = OpenAI()
+
+# After: Through ZeroVeil with DLP
+client = OpenAI(base_url="https://your-zeroveil/v1")
+
+# Your code stays the same
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": user_input}]
+)
+```
+
+**What you get:**
+- PII/PHI/PCI rejection before data leaves your environment
+- Audit logging for compliance (metadata-only, no content)
+- Model allowlists (restrict to approved models)
+- Rate/cost limits per tenant
+- Works with OpenRouter, OpenAI, Anthropic, or any OpenAI-compatible endpoint
+
+### For Enterprise IT / Security
+
+Deploy as a corporate AI gateway that intercepts all employee AI interactions:
+
+```
++-------------------------------------------------------------+
+| Corporate Network                                           |
+|                                                             |
+|  Employee  --> ZeroVeil Gateway --> OpenAI/Anthropic/etc   |
+|  ChatGPT   -->  - PII rejection (blocks sensitive data)    |
+|  Apps      -->  - Model allowlists                         |
+|  CI/CD     -->  - Rate/cost limits                          |
+|                 - Audit logging                             |
+|                                                             |
+|  Firewall: BLOCK direct api.openai.com                     |
++-------------------------------------------------------------+
+```
+
+**What happens when ZeroVeil detects sensitive data:**
+
+1. Request is **blocked immediately**—never reaches the LLM provider
+2. Employee sees actionable error: "Request blocked: PII detected (email, SSN). Remove sensitive data before retrying."
+3. IT/Security receives audit event (metadata only, no content logged)
+4. Employee rephrases without sensitive data, or escalates to approved channel
+
+**We reject, we don't scrub.** If you send data to a service to "clean" it, you've already exposed it. ZeroVeil detects and blocks—your sensitive data never leaves your network.
+
+**What you get:**
+- Drop-in proxy (apps just change `OPENAI_API_BASE`)
+- Block direct provider access at firewall
+- Per-department budgets and model restrictions
+- Compliance-ready audit trails
+
+**Pro roadmap: Scrubbing webhook integration.** For enterprises with existing data cleaning pipelines, ZeroVeil can optionally forward blocked requests to your scrubbing service. Your service cleans the data, then retries through ZeroVeil. ZeroVeil never touches your data—but integrates with your existing compliance infrastructure.
+
+### The Mixer (`PLANNED_COMMUNITY`)
+
+Planned Community capability: forward requests through ZeroVeil's mixer for correlation resistance.
 
 ```
 User A --->
-User B --+--> [Cortex1-ZeroVeil] ---> Shared Identity ---> Cloud Provider
+User B --+--> [ZeroVeil Mixer] ---> Shared Identity ---> Cloud Provider
 User C --->
 ```
 
-**Analogy:** Mix networks (a concept from anonymous communication research, similar to cryptocurrency tumblers) pool messages through intermediate nodes, breaking the sender<->receiver link. Cortex1-ZeroVeil applies this principle to LLM traffic, pooling prompts through a shared relay identity to reduce the user<->prompt linkability.
-
-### How It Works
-
-1. Users scrub PII locally in their own environment
-2. Users send scrubbed requests to Cortex1-ZeroVeil relay
-3. Relay strips/replaces identifying metadata
-4. Requests batched within configurable windows
-5. Batched requests sent via shared provider credentials
-6. Responses demultiplexed back to originators
-
-**Result:** Provider sees one source (the relay), not individual users.
-
-### Trust Model
-
-Users must trust the relay operator to:
-- Not log prompt content
-- Not correlate users to prompts
-- Enforce stated policies
-
-This is **risk reduction through trust distribution**, not trustless privacy. Users who cannot accept this should self-host.
+Target behavior after rollout: provider sees one source, not individual users.
 
 ---
 
-## Why We Don't Scrub Your Data
+## Why We Reject, Not Scrub
 
-### The Privacy Paradox
+**If you send us PII to scrub, you've already compromised your privacy.**
 
-Many services offer cloud-based PII scrubbing as a "privacy feature." This is fundamentally misguided.
+| Approach | What Happens | Problem |
+|----------|--------------|---------|
+| Cloud scrubbing | You send raw PII to them, they remove it | You've already exposed it |
+| **ZeroVeil** | We detect PII, reject the request | Your PII never leaves your network |
 
-**If you send raw PII to a third party for scrubbing, you've already compromised your privacy.**
+The rejection response tells you what was detected, so you can fix it locally before retrying.
 
-Consider what you're doing:
-- Sending names, SSNs, health records, financial data to a third party
-- Trusting them to handle it correctly
-- Trusting their security, their employees, their compliance
-- All before any "privacy protection" happens
-
-That's not privacy. That's outsourcing risk while calling it protection.
-
-### The Privacy-Correct Approach
-
-| Responsibility | Owner | Why |
-|----------------|-------|-----|
-| Content privacy (PII/PHI scrubbing) | User | Your data never leaves your environment |
-| Identity privacy (user<->prompt unlinking) | ZeroVeil | Requires multi-tenant aggregation infrastructure |
-
-### Benefits of This Separation
-
-1. **Minimized trust**: We never see your raw PII
-2. **Simpler compliance**: We're not a processor of personal data
-3. **Better security posture**: Can't leak what we don't have
-4. **User control**: You choose your scrubbing approach
-
-
-
-We will never operate a cloud PII scrubbing service.
-
-### Local-Only Scrubbing (Already Available)
-
-Client-side scrubbing exists today:
-
-- **ZeroVeil SDK** (open-source, BSL): local-only PII scrubbing using Microsoft Presidio, plus a minimal relay client. Runs entirely in your environment.
-- **ZeroVeil Pro** (private, in active development): advanced deterministic/non-deterministic scrubbing, reversible token mapping, multiple backends, and audit logging.
+For proactive scrubbing, use the ZeroVeil SDK (local-only, source-available under BSL) or your own tooling.
 
 ---
 
-## Architecture Overview
+## How We Compare
 
-### Core: Aggregation Layer
-
-The mixer component that pools and routes requests:
-- Multi-tenant request aggregation
-- Timing normalization (reduces fingerprinting)
-- Shared credential management
-- Response routing and isolation
-
-### Enforcement: ZDR Policy
-
-Strict Zero Data Retention requirements:
-- Provider allow-list with verified policies
-- Runtime verification where supported
-- Fallback handling for unverified providers
-
-### Optimization: Provider Reviews
-
-We are implementing periodic evaluation of supported providers to optimize routing:
-- Cost efficiency and pricing trends
-- Latency and throughput benchmarks
-- Task-specific performance (coding, analysis, creative tasks)
-- ZDR compliance verification
-- Reliability metrics
-
-Tier escalation and pricing/cost policy are **Pro** features; the Community gateway remains conservative and auditable, and the ZeroVeil SDK remains intentionally minimal. Both Community and Pro are available self-hosted or cloud-hosted.
-
-### Aggregation Benefits
-
-The multi-tenant architecture provides compounding advantages:
-
-*Correlation Resistance (Risk Reduction):*
-- Larger user base = larger "mixing set" -> lower correlation risk (not a guarantee)
-- More traffic = better timing obfuscation
-- Diverse patterns make individual fingerprinting harder
-
-*Economic:*
-- Aggregated volume qualifies for better pricing tiers
-- Collective buying power enables enterprise rate negotiations
-- Shared infrastructure and compliance costs
-
-This creates a virtuous network effect: more users -> stronger mixing set and lower costs for everyone.
-
-### Routing
-
-- Device-aware local-first routing can be done client-side.
-- Tier escalation and automated cost/pricing policy are Pro/Hosted features.
-
----
-
-## Market Opportunity
-
-### The Gap
-
-The data privacy and AI security space has seen significant consolidation, including Veeam's $1.73B acquisition of Securiti AI (2025) and multi-billion dollar PE discussions around market leaders like OneTrust. Yet no solution offers:
-
-| Requirement | Current Market |
-|-------------|----------------|
-| Provider-neutral | Partial (some tools) |
-| Provider-side correlation resistance | **Nobody (as a mainstream default)** |
-| Privacy-correct architecture | **Nobody** (most offer cloud scrubbing) |
-| Honest about trust tradeoffs | Rare |
-
-### Positioning
-
-**"Switzerland of LLM Privacy"**
-
-- Neutral relay, not an LLM provider
-- Privacy by architecture, not policy
-- Honest about what requires trust
-- Never asks for your raw PII
-- Works across OpenAI, Anthropic, Google, open-source
+| Competitor | Their Approach | ZeroVeil Difference |
+|------------|---------------|---------------------|
+| Bastio, Portkey | Cloud scrubbing | We reject, not scrub—your PII never reaches us |
+| LiteLLM + Presidio | DIY toolkit | We provide compliance-ready audit + gateway out of box |
+| Kong Enterprise | Enterprise pricing | Developer-friendly, source-available core (BSL) |
+| Bedrock/Model Armor | Single provider | Provider-agnostic, works with any endpoint |
+| **All of them** | No correlation resistance | `PLANNED_COMMUNITY`: design reduces user-to-prompt linkability through mixing |
 
 ---
 
 ## Use Cases
 
-### Enterprise
+### Developers Building Regulated Apps
 
-- Aggregate employee LLM usage through corporate relay
-- Reduce individual<->prompt correlation for compliance
-- Unified ZDR enforcement across providers
-- Keep PII scrubbing internal (as it should be)
+**Healthcare:** App processes patient data with LLM. ZeroVeil blocks PHI before it reaches the model.
+
+**Fintech:** App handles financial data. ZeroVeil rejects PCI patterns, provides audit trail for compliance.
+
+**Legal:** App processes privileged documents. ZeroVeil prevents confidential content from leaking.
+
+**Any regulated industry:** Add DLP controls without building from scratch or paying enterprise prices.
+
+### Enterprise IT / Corporate AI Gateway
+
+**The problem:** Employees pasting sensitive data into AI chatbots—emails, source code, financials, customer PII.
+
+**The solution:** Don't ban AI—control it through ZeroVeil.
+
+- Deploy as the only approved path to AI providers
+- Block direct access at firewall
+- PII rejection catches accidental leaks (employee sees actionable error)
+- Model allowlists restrict to approved models
+- Audit logging for compliance (metadata only)
 
 ### SaaS / Multi-Tenant
 
 - Offer privacy guarantees to customers
 - Reduce liability from customer data exposure
-- Competitive differentiator
 - Clear trust boundaries
-
-### Personal / Privacy-Conscious
-
-- Individual users pooling through shared relay
-- Reduced fingerprinting surface
-- Lower barrier than self-hosting
 
 ### Regulated Industries
 
-- Healthcare: Scrub PHI locally, relay handles identity privacy only
-- Legal: Privilege protection with clear boundaries
-- Finance: Compliance-friendly architecture
+- **Healthcare:** PHI never reaches relay (client scrubs), audit logging for HIPAA
+- **Legal:** Privilege protection with clear boundaries
+- **Finance:** PCI rejection, compliance-friendly architecture
 
 ---
 
-## Compliance & Security Standards
+## Trust Model
 
-ZeroVeil Pro supports enterprise compliance across major frameworks:
+**Be clear about what you're trusting:**
+
+| Component | You Trust |
+|-----------|-----------|
+| Gateway | ZeroVeil to enforce policies and not log content |
+| ZDR Providers | Provider's retention policy claims |
+| Your Environment | That you're blocking direct AI access |
+
+We designed this so you trust us with **less**, not more:
+- We never see your raw PII (if you reject properly)
+- We don't log prompt content by default
+- You can self-host for full control
+
+---
+
+## Deployment Options
+
+| Option | Who Operates | Best For |
+|--------|--------------|----------|
+| **Self-Hosted** | You | Full control, air-gapped environments |
+| **Cloud-Hosted** | ZeroVeil | Network effect (larger mixing pool), lower ops |
+
+**For developers:** Self-host in your environment, or use ZeroVeil Cloud.
+
+**For enterprises:** Deploy on-prem behind your firewall, or use ZeroVeil Cloud with BAA.
+
+---
+
+## Compliance & Security
+
+ZeroVeil Pro supports enterprise compliance:
 
 | Framework | How ZeroVeil Helps |
 |-----------|-------------------|
-| **HITRUST CSF** | PHI never reaches relay (client scrubs), audit logging |
-| **SOC 2 Type II** | Access controls, metadata-only audit trails |
-| **ISO 27001/27701** | Information security + privacy management controls |
-| **NIST CSF** | US enterprise security baseline alignment |
-| **NIST AI RMF** | AI-specific privacy and risk management |
-| **HIPAA** | BAA support, architectural PHI avoidance |
-| **GDPR** | Data minimization, DPA templates |
-
-**Key compliance advantages:**
-- PII/PHI never reaches ZeroVeil (client-side scrubbing) → simplified processor obligations
-- No content logging → reduced audit scope
-- ZDR-only providers → documented data handling chain
-
-See [docs/compliance.md](compliance.md) for detailed control mappings.
+| **HIPAA** | PHI rejection, BAA support, audit logging |
+| **SOC 2** | Access controls, metadata-only audit trails |
+| **HITRUST CSF** | PHI never reaches relay, audit logging |
+| **ISO 27001/27701** | Information security + privacy controls |
+| **PCI DSS** | Card data rejection at boundary |
 
 ---
 
-## Deployment Models
+## Getting Started
 
-Both Community and Pro editions support either deployment option.
+### For Developers
 
-| Model | Trust | Control | Mixing Benefit | Best For |
-|-------|-------|---------|----------------|----------|
-| **Cloud-hosted** | Trust operator | Low | High (network effect) | Most users, small-medium orgs |
-| **Self-hosted** | Self only | High | None (unless multi-tenant) | Air-gap, data sovereignty |
+```bash
+# Install
+pip install zeroveil
 
-**Recommendation:** Cloud-hosted is preferable for most organizations because larger mixing pools provide stronger correlation resistance. Self-hosting sacrifices mixing benefits for full control.
+# Configure
+export ZEROVEIL_UPSTREAM_URL="https://api.openai.com/v1"
+export ZEROVEIL_API_KEY="your-openai-key"
 
----
+# Run
+python -m zeroveil_community
 
-## Limitations and Honesty
+# Use in your app
+client = OpenAI(base_url="http://localhost:8000/v1")
+```
 
-### What This Protects Against
+### For Enterprise IT
 
-- Provider-side user<->prompt correlation
-- API key breach exposing user history
-- Metadata accumulation at provider
-
-### What This Does NOT Protect Against
-
-- Malicious relay operator (trust required)
-- Content-based fingerprinting (highly unique prompts)
-- Legal compulsion of relay operator
-- Side-channel attacks
-- PII in content (your responsibility)
-
-### The Trust Tradeoff
-
-Users trade provider trust for relay trust. For many threat models, this is favorable:
-- Relay is specialized and auditable
-- Provider is large target with many interests
-- Distributed trust may be preferable to concentrated trust
-- Relay never sees raw PII (if users scrub correctly)
-
----
-
-## Licensing and Governance
-
-**Business Source License 1.1**
-
-- Non-commercial use: Permitted immediately
-- Commercial use: Requires license
-- Change Date: January 1, 2030
-- Change License: Apache 2.0
-
-**Intent:** Transition to permissive open-source earlier if responsible governance established. Potential foundation structure for long-term neutrality.
+See [docs/architecture.md](architecture.md) for Corporate AI Gateway deployment topology.
 
 ---
 
 ## Conclusion
 
-Cortex1-ZeroVeil addresses the **identity privacy gap** in LLM usage that no current solution fills. By applying mix network principles from anonymous communication research to AI infrastructure, it targets provider-side correlation resistance without requiring full self-hosting.
+ZeroVeil fills the gap between:
+- **DIY toolkits** that lack compliance artifacts
+- **Enterprise gateways** with enterprise pricing
+- **Cloud scrubbing** that defeats the purpose of privacy
 
-Unlike competitors who offer to scrub your PII in the cloud — asking you to trust them with sensitive data before "protecting" it — we take the privacy-correct approach: you handle content privacy locally, we handle identity privacy through aggregation.
+Whether you're a developer adding DLP to a regulated app or an IT team controlling corporate AI access, ZeroVeil gives you:
+
+1. **One-line integration** — OpenAI-compatible, works with any endpoint
+2. **Reject, not scrub** — Your PII never leaves your environment
+3. **Correlation resistance (`PLANNED_COMMUNITY`)** — Planned mixer design to reduce user-to-prompt linkability
 
 This is privacy done right.
 

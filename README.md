@@ -1,84 +1,227 @@
 # Cortex1-ZeroVeil
 
-**Zero Data Retention LLM Privacy Relay**
+**DLP Controls for Any LLM API**
+
+*For Developers Building Regulated Apps and Enterprise IT Teams*
 
 Part of the Cortex1 family of privacy-first AI infrastructure.
 
 ---
 
-## What Is This?
+## Repo Tier and Access
 
-Cortex1-ZeroVeil is a privacy-preserving relay layer for Large Language Model interactions. It breaks the correlation between users and their prompts at the cloud provider level — applying mix network principles from anonymous communication research (similar in concept to cryptocurrency tumblers).
+- Tier: **Community/Public**
+- Audience: developers and teams adopting the open community gateway.
+- Pro note: enterprise paid features live in private repos (`zeroveil-gateway-pro`, `zeroveil-pro`).
 
-**The problem:** When you call OpenAI/Anthropic/Google APIs, they know exactly who sent each prompt via your API key. Even with "zero data retention" promises, they see the link.
+## Quick Start (Community Gateway)
 
-**The solution:** Cortex1-ZeroVeil aggregates prompts from multiple tenants through a shared relay identity. The cloud provider sees one anonymous source, not individual users.
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+python -m pip install -e .[dev]
+
+# Required for provider calls
+export ZEROVEIL_API_KEY="your-provider-api-key"
+
+# Start gateway (OpenAI-compatible endpoint on :8000)
+python -m zeroveil_gateway
+
+# Smoke check
+curl http://127.0.0.1:8000/healthz
+```
+
+## Development and Test
+
+```bash
+# Unit tests
+pytest -q
+
+# Lint (if installed)
+ruff check src tests
+
+# Demo request flow
+python scripts/demo_gateway.py
+```
+
+## Core Configuration
+
+- `ZEROVEIL_API_KEY`: upstream provider key used by the gateway.
+- `ZEROVEIL_POLICY_PATH`: policy JSON path (default `policies/default.json`).
+- `ZEROVEIL_TENANTS_PATH`: tenant config JSON path (default `tenants/default.json`).
+- `ZEROVEIL_STUB_MODE`: set `1`/`true` for local stub mode.
+- `ZEROVEIL_OPENROUTER_API_KEY`: OpenRouter key when routing via OpenRouter.
+
+## Related ZeroVeil Repos
+
+- `zeroveil-sdk`: public/community client SDK.
+- `zeroveil-gateway-pro`: private paid gateway repo.
+- `zeroveil-pro`: private paid SDK/features repo.
 
 ---
 
-## Core Product: Privacy Relay (Mixer)
+## What Is This?
+
+Cortex1-ZeroVeil is an **OpenAI-compatible proxy** that adds DLP controls to any LLM endpoint—with one line of code.
+
+```python
+# Add DLP to your app
+client = OpenAI(base_url="https://your-zeroveil/v1")
+```
+
+**What makes ZeroVeil unique:**
+
+1. **We reject PII, we don't scrub it.** If you send us data to "clean," you've already exposed it. ZeroVeil detects PII patterns and blocks the request—your sensitive data never leaves your environment.
+
+2. **Provider-side correlation resistance (`PLANNED_COMMUNITY`).** Mixer primitives are planned for Week 5. Current releases provide DLP gateway controls; correlation-resistance claims apply after mixer rollout.
+
+3. **Works with any OpenAI-compatible endpoint.** Direct providers (OpenAI, Anthropic), aggregators (OpenRouter, Together AI), or self-hosted models (vLLM, Ollama).
+
+---
+
+## Who Is This For?
+
+### Developers Building Regulated Apps
+
+You're building an app that calls LLM APIs and handles PHI, PII, or PCI data. How do you add DLP today?
+
+| Option | Problem |
+|--------|---------|
+| Build your own | Time, expertise, ongoing maintenance |
+| Enterprise gateways (Kong, Securiti) | Enterprise pricing, enterprise sales cycle |
+| Open-source toolkits (LiteLLM + Presidio) | No compliance artifacts, DIY audit logging |
+| Cloud scrubbing (Strac, Private AI) | You send them your PII first—defeats the purpose |
+| Provider guardrails (Bedrock, Model Armor) | Single-provider lock-in |
+
+**ZeroVeil fills this gap:** Developer-friendly, provider-agnostic, compliance-ready.
+
+```python
+from openai import OpenAI
+
+# Before: Direct to provider
+client = OpenAI()
+
+# After: Through ZeroVeil with DLP
+client = OpenAI(base_url="https://your-zeroveil/v1")
+
+# Your code stays the same
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": user_input}]
+)
+```
+
+**What you get:**
+- PII/PHI/PCI rejection before data leaves your environment
+- Audit logging for compliance (metadata-only, no content)
+- Model allowlists (restrict to approved models)
+- Rate/cost limits per tenant
+- Works with OpenRouter, OpenAI, Anthropic, or any OpenAI-compatible endpoint
+
+### Enterprise IT / Security Teams
+
+Employees are pasting everything into AI chatbots—the same things they used to paste into search engines, plus far worse:
+
+- Corporate emails, business plans, proposals, RFP responses
+- Confidential legal agreements, M&A documents, board presentations
+- Proprietary source code, API keys, database credentials
+- Financial spreadsheets: quarterly numbers, salary data with names, revenue forecasts
+- Customer PII, patient records, internal org charts
+
+Companies are responding with blanket bans:
+
+| Company | Action | Reason |
+|---------|--------|--------|
+| Samsung | Banned ChatGPT | Source code leaked |
+| Apple | Restricted use | Confidential information concerns |
+| Verizon | Blocked | Customer data / source code risk |
+| Deutsche Bank | Blocked | Data leakage protection |
+
+**The solution:** Don't ban AI—control it through ZeroVeil.
+
+```
++-------------------------------------------------------------+
+| Corporate Network                                           |
+|                                                             |
+|  Employee  --> ZeroVeil Gateway --> OpenAI/Anthropic/etc   |
+|  ChatGPT   -->  - PII rejection (blocks sensitive data)    |
+|  Apps      -->  - Model allowlists                         |
+|  CI/CD     -->  - Rate/cost limits                          |
+|                 - Audit logging                             |
+|                                                             |
+|  Firewall: BLOCK direct api.openai.com                     |
++-------------------------------------------------------------+
+```
+
+**What happens when ZeroVeil detects sensitive data:**
+
+1. Request is **blocked immediately**—never reaches the LLM provider
+2. Employee sees actionable error: "Request blocked: PII detected (email, SSN). Remove sensitive data before retrying."
+3. IT/Security receives audit event (metadata only, no content logged)
+4. Employee rephrases without sensitive data, or escalates to approved channel
+
+**We reject, we don't scrub.** If you send data to a service to "clean" it, you've already exposed it. ZeroVeil detects and blocks—your sensitive data never leaves your network.
+
+**What you get:**
+- Drop-in proxy (apps just change `OPENAI_API_BASE`)
+- Block direct provider access at firewall
+- Per-department budgets and model restrictions
+- Compliance-ready audit trails
+- `PLANNED_COMMUNITY`: Optional mixer routing for correlation resistance (Week 5 target)
+
+**Pro roadmap: Scrubbing webhook integration.** For enterprises with existing data cleaning pipelines, ZeroVeil can optionally forward blocked requests to your scrubbing service. Your service cleans the data using your approved methods, then retries through ZeroVeil. ZeroVeil never touches your data—but integrates with your existing compliance infrastructure.
+
+---
+
+## Planned Innovation: Mixer Architecture (`PLANNED_COMMUNITY`)
+
+This is a design target for the Community roadmap (not active in Week 2 builds).
 
 ```
 User A --->
-User B --+--> [Cortex1-ZeroVeil] ---> Shared Identity ---> Cloud LLM
+User B --+--> [ZeroVeil Mixer] ---> Shared Identity ---> Cloud LLM
 User C --->
 ```
 
-**What it does:**
-- Aggregates prompts from multiple users/tenants
-- Routes through shared relay identity
-- Breaks user<->prompt correlation at provider level
-- Enforces Zero Data Retention (ZDR) provider policies
+**How it is planned to work:**
+- Aggregates requests from multiple tenants through a shared relay identity
+- Provider sees one source, not individual users
+- Timing jitter and batching reduce fingerprinting
+- Response routing via one-time tokens (unlinkable)
 
-**What it does NOT do:**
-- Scrub your content (see below — this is intentional)
-- Guarantee absolute anonymity (risk reduction, not magic)
-- Replace your security practices
-
----
-
-## Why We Don't Scrub Your Data
-
-**If you send us PII/PHI to scrub, you've already compromised your privacy.**
-
-Think about it: sending sensitive data to a third party for "privacy processing" defeats the purpose. You'd be trusting us with your most sensitive information — names, SSNs, health records — before we "protect" it.
-
-**True privacy = minimizing trust.**
-
-### The Privacy-Correct Approach
-
-| Step | Where | Who Controls |
-|------|-------|--------------|
-| 1. Scrub PII/PHI | YOUR environment | You |
-| 2. Send scrubbed content | To ZeroVeil | You |
-| 3. Anonymize & relay | ZeroVeil | Us |
-
-We handle **identity privacy** (reducing user<->prompt correlation). You handle **content privacy** (removing PII before it leaves your environment).
-
-### Local Scrubbing Tooling (Client-Side)
-
-ZeroVeil SDK is an open-source (BSL) client library for local PII scrubbing and relay access. It runs **entirely in your environment**—your data never leaves. We will never ask you to send raw PII to us.
-
-*Note: The `zeroveil-sdk` repository is source-available under BSL. Early access is invite-only during initial development.*
-
-Anyone offering cloud-based PII scrubbing as a "privacy feature" is asking you to trust them with the very data you're trying to protect. That's not privacy — that's outsourcing risk.
+**Why this matters:**
+- Even with "zero data retention," providers see who sent each prompt in real-time
+- API key breaches expose user-to-prompt history
+- Metadata accumulation enables competitive intelligence and legal exposure
+- **Design goal:** reduce provider-side correlation risk through mixing once primitives ship
 
 ---
 
-## Additional Features
+## Why We Reject, Not Scrub
 
-### ZDR Enforcement
-- Only routes to providers with verified Zero Data Retention policies
-- Provider allow-list maintained and auditable
+**If you send us PII to scrub, you've already compromised your privacy.**
 
-### Routing (Best practices)
+| Approach | What Happens | Problem |
+|----------|--------------|---------|
+| Cloud scrubbing | You send raw PII to us, we remove it | You've already exposed it to us |
+| **ZeroVeil** | We detect PII, reject the request | Your PII never leaves your network |
 
-- Community gateway: enforce policy and provide provider adapters; keep routing logic conservative and auditable.
-- Pro/Hosted: advanced routing policy (e.g., tier escalation and automated cost/pricing controls) lives in Pro.
+**The rejection response tells you what was detected**, so you can fix it locally before retrying.
 
-### Local-First Option
-- Prefer local models when hardware permits
-- Cloud only when necessary or beneficial
+For proactive scrubbing, use the ZeroVeil SDK (local-only, source-available under BSL) or your own tooling.
+
+---
+
+## How We Compare
+
+| Competitor | Their Approach | ZeroVeil Difference |
+|------------|---------------|---------------------|
+| Bastio, Portkey | Cloud scrubbing | We reject, not scrub—your PII never reaches us |
+| LiteLLM + Presidio | DIY toolkit | We provide compliance-ready audit + gateway out of box |
+| Kong Enterprise | Enterprise pricing | Developer-friendly, source-available core (BSL) |
+| Bedrock/Model Armor | Single provider | Provider-agnostic, works with any endpoint |
+| **All of them** | No correlation resistance | `PLANNED_COMMUNITY`: design reduces user-to-prompt linkability through mixing |
 
 ---
 
@@ -88,9 +231,9 @@ Anyone offering cloud-based PII scrubbing as a "privacy feature" is asking you t
 
 | Component | You Trust |
 |-----------|-----------|
-| Relay/Mixer | ZeroVeil operator to not log prompts (already scrubbed by you) |
+| Gateway | ZeroVeil to enforce policies and not log content |
 | ZDR Providers | Provider's retention policy claims |
-| Your Local Scrubber | Your own implementation |
+| Your Environment | That you're blocking direct AI access |
 
 We designed this so you trust us with **less**, not more.
 
@@ -98,20 +241,40 @@ We designed this so you trust us with **less**, not more.
 
 ## Getting Started
 
-### ZeroVeil SDK (Free, Source-Available)
-
-Install the client SDK for local PII scrubbing and relay access:
+### For Developers
 
 ```bash
+# Install
 pip install zeroveil
+
+# Configure
+export ZEROVEIL_UPSTREAM_URL="https://api.openai.com/v1"
+export ZEROVEIL_API_KEY="your-openai-key"
+
+# Run
+python -m zeroveil_gateway
+
+# Use in your app
+client = OpenAI(base_url="http://localhost:8000/v1")
 ```
 
-**Features:**
-- Local PII/PHI scrubbing via Presidio
-- ZeroVeil relay client
-- Simple API for privacy-preserving LLM interactions
+### For Enterprise IT
 
-*SDK repo: source-available (BSL), early access invite-only*
+```bash
+# Install
+python -m pip install -e .[dev]
+
+# Configure
+set ZEROVEIL_POLICY_PATH=policies/default.json
+
+# Run gateway
+python -m zeroveil_gateway
+
+# Test
+python scripts/demo_gateway.py
+```
+
+See [docs/architecture.md](docs/architecture.md) for Corporate AI Gateway deployment topology.
 
 ### Deployment Options
 
@@ -124,7 +287,9 @@ Both Community and Pro are available **self-hosted** or **cloud-hosted**:
 
 **Recommendation:** For small-to-medium organizations, **cloud-hosted is preferable** because larger mixing pools provide stronger correlation resistance.
 
-### ZeroVeil Pro
+---
+
+## ZeroVeil Pro
 
 Enterprise features on top of Community:
 
@@ -132,9 +297,8 @@ Enterprise features on top of Community:
 - Architecture aligned with HITRUST CSF, ISO 27001/27701, SOC 2, NIST CSF, NIST AI RMF
 - Compliance evidence bundles for customer audits
 - Signed/immutable audit logs
-- PII/PHI reject-only ingress checks
-- Deterministic/non-deterministic scrubbing modes (SDK)
-- Reversible token mapping (SDK)
+- Admin dashboard UI (requests, blocks, costs by tenant)
+- SIEM webhook integration
 
 *Formal certifications for ZeroVeil Hosted on roadmap pending scale.*
 
@@ -146,27 +310,27 @@ Contact: Saqib.Khan@Me.com for access.
 
 ## Status
 
-Week 1 complete: v0 spec + policy enforcement stub gateway (FastAPI). Provider routing is stubbed; policy and logging contracts are implemented and test-covered.
+**Week 2 complete.** DLP gateway is implemented; mixer primitives are planned for Week 5.
+
+| Component | Status |
+|-----------|--------|
+| Policy enforcement | Done |
+| PII rejection gate | Done (enabled by default) |
+| Multi-tenant auth | Done |
+| Audit logging (metadata-only) | Done |
+| Provider routing | Stubbed (Week 3) |
+| Mixer primitives | Week 5 (batching, shuffle, jitter, header stripping) |
+
+**Roadmap:** `IMPLEMENTED_NOW` DLP Gateway → `PLANNED_COMMUNITY` Mixer primitives → `PLANNED_COMMUNITY` Multi-provider support → Public release
 
 ---
 
-## Week 1: Gateway Spec + Skeleton
+## Key Files
 
-The community gateway is defined by `docs/spec-v0.md` and includes a minimal FastAPI stub implementation.
-
-- Spec (API/policy/logging): `docs/spec-v0.md`
-- Editions (Community vs Pro): `docs/editions.md`
-- Example policy: `policies/default.json`
-- FastAPI stub: `src/zeroveil_gateway/app.py` (returns `stubbed_response`)
-
-Local run (dev):
-
-```bash
-python -m pip install -e .[dev]
-set ZEROVEIL_POLICY_PATH=policies/default.json
-python -m zeroveil_gateway
-python scripts/demo_gateway.py
-```
+- Spec: `docs/spec-v0.md`
+- Policy schema: `policies/default.json`
+- Gateway: `src/zeroveil_gateway/app.py`
+- Whitepaper: `docs/whitepaper.md`
 
 ---
 
@@ -185,16 +349,14 @@ Open an issue or reach out: Saqib.Khan@Me.com
 
 ## License
 
-**Business Source License 1.1**
+Business Source License 1.1 (BSL 1.1)
 
-- **Non-commercial use**: Permitted
-- **Commercial/production use**: Requires explicit license
-- **Change Date**: January 1, 2030
-- **Change License**: Apache License 2.0
+- Non-production use allowed; production/commercial/hosted use requires a commercial license.
+- Change Date: 2030-01-01
+- Change License: Apache 2.0
+- Contact: Saqib.Khan@Me.com
 
-Intent: Transition to permissive open-source earlier if community adoption and responsible governance are achieved.
-
-See [LICENSE](LICENSE) for full terms.
+Effective starting with commit TBD_COMMIT_HASH (or release vX.Y.Z), this repository is licensed under BSL 1.1 with the Additional Use Grant in LICENSE. Prior versions remain under the license in effect at the time they were published.
 
 ---
 

@@ -97,7 +97,7 @@ ZeroVeil specifically addresses AI-related risks per the NIST AI Risk Management
 | Privacy | Mixer architecture reduces provider-side correlation |
 | Security | No content logging, encrypted transport |
 | Accountability | Audit trails, tenant isolation |
-| Transparency | Open-source Community gateway, published policies |
+| Transparency | Source-available Community gateway, published policies |
 
 ---
 

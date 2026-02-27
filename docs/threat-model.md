@@ -1,17 +1,19 @@
 # ZeroVeil Threat Model (v1)
 
-## Design Philosophy: FAIL-SAFE
+## Design Philosophy: FAIL-SAFE (NON-NEGOTIABLE)
 
-**Security is OPT-OUT, not opt-in.**
+**Security is OPT-OUT, not opt-in. Most restrictive by default.**
 
 ZeroVeil defaults to the most restrictive, privacy-preserving configuration:
+- **PII scanning**: ALWAYS ON - gateway scans every request, no bypass, no exceptions
 - **PII gate**: ENABLED by default - rejects requests containing obvious PII patterns
 - **ZDR-only**: ENABLED by default - requires zero data retention intent
-- **Scrub attestation**: REQUIRED by default - client must confirm data is scrubbed
 - **Metadata-only logging**: ENFORCED - content is never logged
+- **Attestation**: Evidence only - client attestation is logged but NEVER bypasses scanning
 
-False positives are acceptable; false negatives are not. Operators must explicitly
-disable protections if they want to relax security posture.
+**Critical principle:** Client attestation ("I scrubbed this") is logged for audit evidence but does NOT reduce or bypass PII scanning. Attestation ≠ protection. Any bug, misconfiguration, or malicious client can still send PII — the gateway catches it regardless of what the client claims.
+
+False positives are acceptable; false negatives are not. Operators must explicitly disable protections if they want to relax security posture.
 
 ## Overview
 
@@ -19,10 +21,10 @@ ZeroVeil is a privacy-focused LLM gateway that enforces policy gates (ZDR-only i
 
 ## What ZeroVeil protects against
 
-- **Accidental prompt/response logging at the gateway** via a metadata-only audit event schema (`src/zeroveil_gateway/audit.py`) and `logging.mode=metadata_only` in `policies/default.json`.
-- **Obvious PII leakage** via regex-based PII gate (`src/zeroveil_gateway/pii.py`) that rejects requests containing SSN, credit card, email, phone, or IP patterns. ENABLED BY DEFAULT.
-- **Policy-violating requests** (e.g., missing scrub attestation or `zdr_only=false`) via enforcement in `src/zeroveil_gateway/app.py` and policy loading in `src/zeroveil_gateway/policy.py`.
-- **Basic abuse and key guessing noise** via per-tenant authentication + rate limiting (`src/zeroveil_gateway/tenants.py`, enforced in `src/zeroveil_gateway/app.py`).
+- **Accidental prompt/response logging at the gateway** via a metadata-only audit event schema (`src/zeroveil_community/audit.py`) and `logging.mode=metadata_only` in `policies/default.json`.
+- **Obvious PII leakage** via regex-based PII gate (`src/zeroveil_community/pii.py`) that rejects requests containing SSN, credit card, email, phone, or IP patterns. ENABLED BY DEFAULT.
+- **Policy-violating requests** (e.g., missing scrub attestation or `zdr_only=false`) via enforcement in `src/zeroveil_community/app.py` and policy loading in `src/zeroveil_community/policy.py`.
+- **Basic abuse and key guessing noise** via per-tenant authentication + rate limiting (`src/zeroveil_community/tenants.py`, enforced in `src/zeroveil_community/app.py`).
 
 ## What it does NOT protect against
 
@@ -37,7 +39,7 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 
 ### What the gateway operator is trusted to do / not do
 
-- **Trusted to do**: terminate TLS, protect secrets/config/log files, patch dependencies, and keep audit logging metadata-only (see `policies/default.json` and `src/zeroveil_gateway/audit.py`).
+- **Trusted to do**: terminate TLS, protect secrets/config/log files, patch dependencies, and keep audit logging metadata-only (see `policies/default.json` and `src/zeroveil_community/audit.py`).
 - **Trusted not to do**: log prompts/responses or instrument request bodies for debugging in production.
 
 ### What the upstream provider is trusted to do / not do
@@ -47,15 +49,15 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 
 ### What the client is trusted to do / not do
 
-- **Trusted to do**: scrub PII/PHI locally and set scrub attestation (`metadata.scrubbed=true`) before sending requests.
-- **Trusted not to do**: treat attestation as proof; the gateway does not cryptographically verify scrubbing (see `docs/spec-v0.md`).
+- **Trusted to do**: scrub PII/PHI locally before sending requests (reduces gateway rejections).
+- **NOT trusted**: client attestation headers. The gateway ALWAYS scans regardless of attestation. Attestation is logged for audit evidence but never bypasses enforcement.
 
 ## Attack Surface
 
 ### API endpoints exposed
 
-- `GET /healthz` (health probe) in `src/zeroveil_gateway/app.py`.
-- `POST /v1/chat/completions` (gateway API) in `src/zeroveil_gateway/app.py` accepting request JSON plus `Authorization: Bearer ...` and optional `X-Zeroveil-Tenant`.
+- `GET /healthz` (health probe) in `src/zeroveil_community/app.py`.
+- `POST /v1/chat/completions` (gateway API) in `src/zeroveil_community/app.py` accepting request JSON plus `Authorization: Bearer ...` and optional `X-Zeroveil-Tenant`.
 
 ### Configuration files (policy.json, tenants.json)
 
@@ -65,7 +67,7 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 
 ### Audit logs
 
-- Default sink is JSONL to `logs/audit.jsonl` (path and retention configured in `policies/default.json`), written by `src/zeroveil_gateway/audit.py`.
+- Default sink is JSONL to `logs/audit.jsonl` (path and retention configured in `policies/default.json`), written by `src/zeroveil_community/audit.py`.
 - Logs include decisions and request metadata (counts/sizes/latency), not prompt/response content, unless modified by the operator.
 
 ### Environment variables (API keys)
@@ -77,8 +79,8 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 
 | Threat | Mitigation | Residual Risk |
 |---|---|---|
-| Upstream sees raw PII | Require client-side scrub + `metadata.scrubbed=true` gate | Client can lie; no cryptographic proof |
-| Obvious PII patterns leak | PII gate rejects SSN/CC/email/phone/IP (ENABLED BY DEFAULT) | Regex-only; won't catch names, addresses, context |
+| Upstream sees raw PII | Gateway PII scanning blocks obvious patterns; client-side scrub recommended | Regex-only; won't catch names, addresses, context |
+| Obvious PII patterns leak | PII gate rejects SSN/CC/email/phone/IP (ALWAYS ON) | Regex-only; determined insider can rephrase |
 | Upstream correlates by API key | ZDR-only intent gate now; shared-identity/mixing is future work | Timing/volume correlation remains possible |
 | Gateway logs leak content | `metadata_only` mode + audit schema lacks content fields | Misconfiguration or code changes can add logging |
 | Brute-force API keys | Rate limiting + compare hashed keys (`sha256`) | Weak keys still guessable over time |
@@ -92,6 +94,37 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 - Client-side malware (out of scope)
 - Upstream provider collusion (trust boundary)
 - Content moderation / prompt injection (application layer)
+- **Client attestation as security control** — attestation is evidence, never a bypass
+
+## Corporate AI Gateway Mode: Additional Considerations
+
+When deployed as a corporate AI gateway (enterprise DLP proxy), additional threats apply:
+
+### What Corporate Gateway Mode Protects Against
+
+| Threat | Mitigation |
+|--------|------------|
+| Accidental PII leakage to AI providers | PII rejection gate blocks before sending |
+| Unauthorized AI model usage | Model allowlist enforcement |
+| Shadow AI (employees using unapproved channels) | Firewall blocks direct provider access |
+| Cost overruns | Per-tenant rate limits and daily budgets |
+| Compliance gaps | Metadata-only audit logging for all interactions |
+
+### What Corporate Gateway Mode Does NOT Protect Against
+
+| Threat | Why | Mitigation |
+|--------|-----|------------|
+| Determined insider rephrasing PII | Can avoid regex detection | Training + monitoring |
+| Obfuscated PII (base64, rot13) | Not detected by pattern matching | Defense in depth |
+| Home network usage | Outside corporate network | Acceptable use policy |
+| Native desktop apps (ChatGPT macOS/Windows) | Certificate pinning bypasses proxy | Block at firewall, force web/API |
+
+### Network Enforcement Requirements
+
+For corporate gateway mode to be effective:
+1. **Block direct access** to `api.openai.com`, `api.anthropic.com`, etc. at firewall
+2. **Deploy gateway** as the only approved path to AI providers
+3. **Certificate pinning apps** (ChatGPT desktop) cannot be proxied—block entirely
 
 ## Abuse Cases
 

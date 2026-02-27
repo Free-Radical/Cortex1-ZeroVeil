@@ -4,6 +4,8 @@ Technical specification for ZeroVeil's request mixing system.
 
 **Goal:** Break the correlation between tenant identity and request content at the provider level.
 
+**Status:** `PLANNED_COMMUNITY` design document. Mixer primitives are not implemented in current v0/v1 Community releases.
+
 ---
 
 ## Overview
@@ -18,9 +20,9 @@ Tenant C ──┘         │                      │
               Strip tenant headers   Normalize requests
 ```
 
-**Provider sees:** Requests from "ZeroVeil" with no tenant-identifying information.
+**Target behavior:** Provider sees requests from "ZeroVeil" with no tenant-identifying information.
 
-**Provider cannot easily determine:** Which tenant sent which request.
+**Target behavior:** Provider cannot easily determine which tenant sent which request.
 
 ---
 
@@ -46,7 +48,7 @@ class MixerConfig:
 | min_batch=3, max_wait=500ms | Up to 500ms | Basic |
 | min_batch=10, max_wait=2000ms | Up to 2s | Good |
 
-**Default (Community):** min_batch=3, max_wait=500ms (balance latency vs. privacy)
+**Planned default (Community):** min_batch=3, max_wait=500ms (balance latency vs. privacy)
 
 ### 2. Request Normalization
 
@@ -157,7 +159,7 @@ PROVIDER_API_KEY = os.getenv("ZEROVEIL_PROVIDER_KEY")  # One key for all tenants
 
 ## Network Effect
 
-Mixing effectiveness scales with tenant count:
+Planned mixing effectiveness scales with tenant count:
 
 ```
 Mixing Pool Size → Correlation Resistance
@@ -168,7 +170,7 @@ Mixing Pool Size → Correlation Resistance
    500 tenants  → ~99.8% (very strong)
 ```
 
-**This is why cloud-hosted is recommended for small organizations.**
+**This is why cloud-hosted is recommended for small organizations once mixer primitives are enabled.**
 
 Self-hosting only provides policy enforcement and ZDR routing — no mixing benefit unless you have multiple internal tenants.
 

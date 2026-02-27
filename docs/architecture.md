@@ -2,17 +2,36 @@
 
 ## Executive Summary
 
-Cortex1-ZeroVeil is a privacy-preserving relay layer for LLM interactions. Its core innovation is a **multi-tenant aggregation architecture** (mixer) that breaks user-to-prompt correlation at the cloud provider level, combined with strict Zero Data Retention enforcement.
+Cortex1-ZeroVeil is a **privacy-first LLM gateway**. The long-term architecture includes an LLM mixer/privacy relay intended to reduce user-to-prompt correlation risk at the provider level through multi-tenant aggregation.
 
-**Important:** PII/PHI scrubbing is explicitly NOT part of the relay service. Users must scrub content locally before sending to ZeroVeil. Sending raw PII to any third party — including us — defeats the purpose of privacy protection.
+Current releases focus on **enterprise DLP controls**: an OpenAI-compatible gateway with PII rejection, model allowlists, rate limits, and audit logging.
+
+**The two value propositions:**
+1. **Identity privacy (`PLANNED_COMMUNITY`):** Mixer architecture intended to reduce linkability
+2. **Content privacy (`IMPLEMENTED_NOW`):** DLP Gateway for developers and enterprises
+
+**Two audiences, same product:**
+- **Developers** — Add DLP to regulated apps with one endpoint change
+- **Enterprise IT** — Control employee AI access through a corporate proxy
+
+**Important:** We **reject** PII, we don't scrub it. If you send us data to clean, you've already exposed it. ZeroVeil detects PII patterns and blocks the request—your sensitive data never leaves your network.
 
 ---
 
 ## Implementation Status
 
-- Community gateway (FastAPI) exists as a Week 1 stub implementing the v0 contract: `docs/spec-v0.md`
-- Policy + scrub attestation enforcement are implemented; provider routing is stubbed
-- Community vs Pro boundary is defined in `docs/editions.md`
+**Week 2 complete.** `IMPLEMENTED_NOW` DLP gateway controls are live; `PLANNED_COMMUNITY` mixer primitives are targeted for Week 5.
+
+| Component | Status |
+|-----------|--------|
+| Policy enforcement | Done |
+| PII rejection gate | Done (enabled by default) |
+| Multi-tenant auth | Done |
+| Audit logging | Done |
+| Provider routing | Stubbed (Week 3) |
+| Mixer primitives | Week 5 (batching, shuffle, jitter, header stripping) |
+
+See `docs/spec-v0.md` for API contract and `docs/editions.md` for Community vs Pro boundary.
 
 ---
 
@@ -35,7 +54,7 @@ Existing solutions address content privacy (PII scrubbing) but not **identity pr
 
 ---
 
-## Solution: Mixer Architecture
+## Solution Blueprint: Mixer Architecture (`PLANNED_COMMUNITY`)
 
 ### Core Concept
 
@@ -51,10 +70,10 @@ User C --->                                ---> Response C
 
 | Property | Mechanism |
 |----------|-----------|
-| Provider-side correlation resistance | Single relay identity for all requests |
-| User<->prompt unlinkability | Aggregation reduces correlation |
-| Timing obfuscation | Batching windows reduce fingerprinting |
-| Reduced metadata exposure | Shared patterns across tenants |
+| Provider-side correlation resistance | Planned shared relay identity |
+| User<->prompt unlinkability | Planned aggregation to reduce correlation |
+| Timing obfuscation | Planned batching windows to reduce fingerprinting |
+| Reduced metadata exposure | Planned shared patterns across tenants |
 
 ### Trust Model
 
@@ -91,9 +110,9 @@ This separation is intentional:
 
 ### Scrubbing Tooling
 
-ZeroVeil SDK provides open-source local scrubbing tooling:
+ZeroVeil SDK provides source-available local scrubbing tooling:
 - **Local-only**: Runs entirely in your environment—your data never leaves
-- **Open-source (BSL)**: Auditable, reviewable, and testable
+- **Source-available (BSL)**: Auditable, reviewable, and testable
 - **Optional**: Not part of the relay service—use your own scrubbing if preferred
 
 *Note: The `zeroveil-sdk` repository is source-available under BSL. Early access is invite-only during initial development.*
@@ -126,12 +145,15 @@ The central mixer component:
 
 ## Editions Boundary (Community vs Pro)
 
-This repository is the **Community Gateway**: the auditable enforcement core with full mixer functionality.
+This repository is the **Community Gateway**: the auditable enforcement core.
 
 Both editions are available **self-hosted** or **cloud-hosted** (operated by ZeroVeil):
 
-- **Community (free, BSL):** Policy enforcement, mixer primitives (batching, shuffle, jitter), metadata-only audit events, conformance tests. Cloud-hosted Community includes shared relay identity for network effect benefits.
-- **Pro (paid):** Enterprise auth (SSO/SAML), architecture aligned with HITRUST/ISO 27001/27701/SOC 2/NIST CSF/AI RMF controls, compliance evidence bundles, signed audit logs, PII reject-only gate, advanced routing policy.
+- **Community (free, BSL):**
+  - `IMPLEMENTED_NOW`: Policy enforcement, PII rejection gate, metadata-only audit events, conformance tests
+  - `PLANNED_COMMUNITY`: Mixer primitives (batching, shuffle, jitter, header stripping), shared relay identity (cloud-hosted deployment)
+- **Pro (paid):**
+  - `PRO_ONLY`: Enterprise auth (SSO/SAML), compliance evidence bundles, signed audit logs, advanced routing/governance
 
 **Recommendation:** For small-to-medium organizations, cloud-hosted is preferable because larger mixing pools provide stronger correlation resistance.
 
@@ -174,7 +196,7 @@ The multi-tenant architecture provides compounding advantages:
 - Collective buying power enables enterprise rate negotiations
 - Shared infrastructure and compliance costs
 
-This creates a virtuous network effect: more users -> stronger mixing set and lower costs for everyone.
+This is the intended network effect once mixer primitives are enabled: more users -> stronger mixing set and lower costs for everyone.
 
 ### 3. Client SDK
 
@@ -320,6 +342,77 @@ Organization runs own relay:
 
 **Best for:** Air-gapped environments, strict data sovereignty requirements, large enterprises with internal multi-tenancy.
 
+### Corporate AI Gateway Mode
+
+ZeroVeil can operate as an enterprise DLP proxy that intercepts and controls all LLM API traffic. The gateway can route to providers directly OR forward to a ZeroVeil mixer (self-hosted or cloud) for correlation resistance:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Corporate Network                                                       │
+│                                                                         │
+│  ┌─────────────┐     ┌─────────────────────────────────────────────┐   │
+│  │ Developer   │     │           ZeroVeil Gateway                  │   │
+│  │ Workstation │     │  ┌─────────────────────────────────────┐    │   │
+│  │             │     │  │ Ingress Layer                       │    │   │
+│  │ OPENAI_API_ │────►│  │ - OpenAI-compatible endpoint        │    │   │
+│  │ BASE=proxy  │     │  │ - Anthropic-compatible endpoint     │    │   │
+│  └─────────────┘     │  └──────────────┬──────────────────────┘    │   │
+│                      │                 │                           │   │
+│  ┌─────────────┐     │  ┌──────────────▼──────────────────────┐    │   │
+│  │ CI/CD       │     │  │ Policy & Inspection Layer           │    │   │
+│  │ Pipeline    │────►│  │ - PII/PHI rejection gate            │    │   │
+│  └─────────────┘     │  │ - Model allowlist enforcement       │    │   │
+│                      │  │ - Cost/rate limiting                │    │   │
+│                      │  └──────────────┬──────────────────────┘    │   │
+│                      │                 │                           │   │
+│                      │  ┌──────────────▼──────────────────────┐    │   │
+│                      │  │ Audit Layer (metadata-only)         │    │   │
+│                      │  └──────────────┬──────────────────────┘    │   │
+│                      │                 │                           │   │
+│                      │  ┌──────────────▼──────────────────────┐    │   │
+│                      │  │ Egress → Route to:                  │    │   │
+│                      │  │   A) LLM providers directly, OR     │    │   │
+│                      │  │   B) ZeroVeil Mixer (for mixing)    │    │   │
+│                      │  └──────────────┬──────────────────────┘    │   │
+│                      └─────────────────┼───────────────────────────┘   │
+│                                        │                               │
+│  Firewall: BLOCK direct access to      │                               │
+│  api.openai.com, api.anthropic.com     │                               │
+└────────────────────────────────────────┼───────────────────────────────┘
+                                         │
+                    ┌────────────────────┴────────────────────┐
+                    ▼                                         ▼
+         ┌─────────────────────┐               ┌─────────────────────────┐
+         │ LLM Providers       │               │ ZeroVeil Mixer          │
+         │ (direct)            │               │ (self-hosted or cloud)  │
+         └─────────────────────┘               │         │               │
+                                               │         ▼               │
+                                               │  ┌─────────────────┐    │
+                                               │  │ LLM Providers   │    │
+                                               │  │ (via mixer)     │    │
+                                               │  └─────────────────┘    │
+                                               └─────────────────────────┘
+```
+
+**Egress routing options:**
+- **Direct to providers:** DLP controls only, no mixing (simpler, lower latency)
+- **Via ZeroVeil Mixer (self-hosted):** DLP + mixing with full control, no external trust
+- **Via ZeroVeil Mixer (cloud):** DLP + mixing with network effect benefits (larger mixing pool)
+
+**Key difference from Privacy Relay mode:** In Corporate Gateway mode, clients don't need to send attestation headers (`require_scrubbed_attestation` is disabled for simpler integration). **PII scanning is ALWAYS ON in both modes** — the gateway never relies on client attestation for security. This enables drop-in deployment where applications only need to change `OPENAI_API_BASE`.
+
+**Integration options:**
+
+| Mode | How It Works | Pros | Cons |
+|------|--------------|------|------|
+| **Direct endpoint** | Apps set `OPENAI_API_BASE` to gateway | Simple, works with any OpenAI-compatible client | Requires app configuration |
+| **DNS override** | Internal DNS resolves `api.openai.com` → gateway | Zero app changes | Requires corporate CA on devices |
+| **Upstream proxy** | Gateway sits behind existing proxy (Squid, Zscaler) | Integrates with existing infra | More complex |
+
+**Network enforcement:** For gateway mode to be effective, direct access to AI providers must be blocked at the firewall. Native desktop apps (ChatGPT macOS/Windows) use certificate pinning and cannot be proxied—block them entirely and force users to web/API channels.
+
+**Best for:** Enterprises requiring DLP controls, compliance logging, and centralized AI governance—with optional correlation resistance via mixer routing.
+
 ---
 
 ## Compliance & Security Standards
@@ -384,7 +477,7 @@ If ZeroVeil ceases operation:
 - Independent security audits
 - PII/PHI leak detection to identify insufficient or failed data scrubbing before relay
 - Transparency reports (periodic publication of aggregate statistics, legal request counts)
-- Open source roadmap (timeline for code auditability)
+- Source-available roadmap (timeline for code auditability)
 - Federated relay architecture (multiple trusted operators for distributed trust)
 - SDK enhancements: additional scrubbing backends, language support expansion
 
