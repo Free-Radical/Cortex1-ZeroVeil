@@ -145,9 +145,9 @@ class TestOpenRouterProvider:
         provider = OpenRouterProvider()
         provider.validate_config()  # Should not raise
 
-    @patch("zeroveil_gateway.providers.openrouter.httpx.Client")
+    @patch("zeroveil_gateway.providers.openrouter.request_with_backoff")
     def test_chat_completions_success(
-        self, mock_client_class: MagicMock, monkeypatch: pytest.MonkeyPatch
+        self, mock_request: MagicMock, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Successful chat completion should return ProviderResponse."""
         monkeypatch.setenv("OPENROUTER_API_KEY", "sk-test-123")
@@ -172,11 +172,7 @@ class TestOpenRouterProvider:
             },
         }
 
-        mock_client = MagicMock()
-        mock_client.post.return_value = mock_response
-        mock_client.__enter__ = MagicMock(return_value=mock_client)
-        mock_client.__exit__ = MagicMock(return_value=False)
-        mock_client_class.return_value = mock_client
+        mock_request.return_value = mock_response
 
         provider = OpenRouterProvider()
         response = provider.chat_completions(
@@ -190,9 +186,9 @@ class TestOpenRouterProvider:
         assert response.total_tokens == 15
         assert response.finish_reason == "stop"
 
-    @patch("zeroveil_gateway.providers.openrouter.httpx.Client")
+    @patch("zeroveil_gateway.providers.openrouter.request_with_backoff")
     def test_chat_completions_uses_default_model(
-        self, mock_client_class: MagicMock, monkeypatch: pytest.MonkeyPatch
+        self, mock_request: MagicMock, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Chat completion should use default model when not specified."""
         monkeypatch.setenv("OPENROUTER_API_KEY", "sk-test-123")
@@ -205,23 +201,19 @@ class TestOpenRouterProvider:
             "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
         }
 
-        mock_client = MagicMock()
-        mock_client.post.return_value = mock_response
-        mock_client.__enter__ = MagicMock(return_value=mock_client)
-        mock_client.__exit__ = MagicMock(return_value=False)
-        mock_client_class.return_value = mock_client
+        mock_request.return_value = mock_response
 
         provider = OpenRouterProvider()
         provider.chat_completions(messages=[{"role": "user", "content": "Hi"}])
 
         # Check that default model was used in request
-        call_args = mock_client.post.call_args
+        call_args = mock_request.call_args
         payload = call_args.kwargs["json"]
         assert payload["model"] == OPENROUTER_CONFIG.default_model
 
-    @patch("zeroveil_gateway.providers.openrouter.httpx.Client")
+    @patch("zeroveil_gateway.providers.openrouter.request_with_backoff")
     def test_chat_completions_api_error(
-        self, mock_client_class: MagicMock, monkeypatch: pytest.MonkeyPatch
+        self, mock_request: MagicMock, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """API error should raise ProviderError with status code."""
         monkeypatch.setenv("OPENROUTER_API_KEY", "sk-test-123")
@@ -233,11 +225,7 @@ class TestOpenRouterProvider:
             "error": {"message": "Invalid API key"}
         }
 
-        mock_client = MagicMock()
-        mock_client.post.return_value = mock_response
-        mock_client.__enter__ = MagicMock(return_value=mock_client)
-        mock_client.__exit__ = MagicMock(return_value=False)
-        mock_client_class.return_value = mock_client
+        mock_request.return_value = mock_response
 
         provider = OpenRouterProvider()
         with pytest.raises(ProviderError) as exc_info:
@@ -246,9 +234,9 @@ class TestOpenRouterProvider:
         assert exc_info.value.status_code == 401
         assert "Invalid API key" in str(exc_info.value)
 
-    @patch("zeroveil_gateway.providers.openrouter.httpx.Client")
+    @patch("zeroveil_gateway.providers.openrouter.request_with_backoff")
     def test_chat_completions_empty_choices(
-        self, mock_client_class: MagicMock, monkeypatch: pytest.MonkeyPatch
+        self, mock_request: MagicMock, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Empty choices should raise ProviderError."""
         monkeypatch.setenv("OPENROUTER_API_KEY", "sk-test-123")
@@ -261,11 +249,7 @@ class TestOpenRouterProvider:
             "usage": {"prompt_tokens": 1, "completion_tokens": 0, "total_tokens": 1},
         }
 
-        mock_client = MagicMock()
-        mock_client.post.return_value = mock_response
-        mock_client.__enter__ = MagicMock(return_value=mock_client)
-        mock_client.__exit__ = MagicMock(return_value=False)
-        mock_client_class.return_value = mock_client
+        mock_request.return_value = mock_response
 
         provider = OpenRouterProvider()
         with pytest.raises(ProviderError) as exc_info:
