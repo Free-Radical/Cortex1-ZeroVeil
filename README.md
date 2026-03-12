@@ -1,5 +1,7 @@
 # Cortex1-ZeroVeil
 
+> **License:** Source-available under PolyForm Noncommercial 1.0.0. Personal, hobby, educational, research, evaluation, and other noncommercial use are allowed. Commercial, hosted, customer-facing, internal business, paid, or other monetized use requires a separate written license. See `LICENSE`, `NOTICE.md`, and `COMMERCIAL-LICENSE.md`.
+
 **DLP Controls for Any LLM API**
 
 *For Developers Building Regulated Apps and Enterprise IT Teams*
@@ -10,9 +12,10 @@ Part of the Cortex1 family of privacy-first AI infrastructure.
 
 ## Repo Tier and Access
 
-- Tier: **Community/Public**
-- Audience: developers and teams adopting the open community gateway.
-- Pro note: enterprise paid features live in private repos (`zeroveil-gateway-pro`, `zeroveil-pro`).
+- **Tier:** Community / Public / Noncommercial
+- Audience: personal users, researchers, and developers evaluating or using the community gateway for noncommercial purposes.
+- Commercial note: paid, hosted, customer-facing, internal business, or other monetized use requires a separate written commercial license.
+- Pro note: commercially licensed paid features live in `zeroveil-gateway-pro` and `zeroveil-pro`.
 
 ## Quick Start (Community Gateway)
 
@@ -56,8 +59,8 @@ python scripts/demo_gateway.py
 ## Related ZeroVeil Repos
 
 - `zeroveil-sdk`: public/community client SDK.
-- `zeroveil-gateway-pro`: private paid gateway repo.
-- `zeroveil-pro`: private paid SDK/features repo.
+- `zeroveil-gateway-pro`: commercially licensed gateway repo.
+- `zeroveil-pro`: commercially licensed SDK/features repo.
 
 ---
 
@@ -349,16 +352,11 @@ Open an issue or reach out: Saqib.Khan@Me.com
 
 ## License
 
-Business Source License 1.1 (BSL 1.1)
+PolyForm Noncommercial License 1.0.0.
 
-- Non-production use allowed; production/commercial/hosted use requires a commercial license.
-- Change Date: 2030-01-01
-- Change License: Apache 2.0
+- Personal, hobby, educational, research, evaluation, and other noncommercial use are allowed.
+- Commercial, hosted, customer-facing, internal business, paid, or other monetized use requires a separate written commercial license.
 - Contact: Saqib.Khan@Me.com
-
-Effective starting with commit TBD_COMMIT_HASH (or release vX.Y.Z), this repository is licensed under BSL 1.1 with the Additional Use Grant in LICENSE. Prior versions remain under the license in effect at the time they were published.
-
----
 
 ## Prior Art
 
