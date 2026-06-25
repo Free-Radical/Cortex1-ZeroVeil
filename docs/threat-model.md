@@ -21,10 +21,10 @@ ZeroVeil is a privacy-focused LLM gateway that enforces policy gates (ZDR-only i
 
 ## What ZeroVeil protects against
 
-- **Accidental prompt/response logging at the gateway** via a metadata-only audit event schema (`src/zeroveil_community/audit.py`) and `logging.mode=metadata_only` in `policies/default.json`.
-- **Obvious PII leakage** via regex-based PII gate (`src/zeroveil_community/pii.py`) that rejects requests containing SSN, credit card, email, phone, or IP patterns. ENABLED BY DEFAULT.
-- **Policy-violating requests** (e.g., missing scrub attestation or `zdr_only=false`) via enforcement in `src/zeroveil_community/app.py` and policy loading in `src/zeroveil_community/policy.py`.
-- **Basic abuse and key guessing noise** via per-tenant authentication + rate limiting (`src/zeroveil_community/tenants.py`, enforced in `src/zeroveil_community/app.py`).
+- **Accidental prompt/response logging at the gateway** via a metadata-only audit event schema (`src/zeroveil_gateway/audit.py`) and `logging.mode=metadata_only` in `policies/default.json`.
+- **Obvious PII leakage** via regex-based PII gate (`src/zeroveil_gateway/pii.py`) that rejects requests containing SSN, credit card, email, phone, or IP patterns. ENABLED BY DEFAULT.
+- **Policy-violating requests** (e.g., missing scrub attestation or `zdr_only=false`) via enforcement in `src/zeroveil_gateway/app.py` and policy loading in `src/zeroveil_gateway/policy.py`.
+- **Basic abuse and key guessing noise** via per-tenant authentication + rate limiting (`src/zeroveil_gateway/tenants.py`, enforced in `src/zeroveil_gateway/app.py`).
 
 ## What it does NOT protect against
 
@@ -39,7 +39,7 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 
 ### What the gateway operator is trusted to do / not do
 
-- **Trusted to do**: terminate TLS, protect secrets/config/log files, patch dependencies, and keep audit logging metadata-only (see `policies/default.json` and `src/zeroveil_community/audit.py`).
+- **Trusted to do**: terminate TLS, protect secrets/config/log files, patch dependencies, and keep audit logging metadata-only (see `policies/default.json` and `src/zeroveil_gateway/audit.py`).
 - **Trusted not to do**: log prompts/responses or instrument request bodies for debugging in production.
 
 ### What the upstream provider is trusted to do / not do
@@ -56,8 +56,8 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 
 ### API endpoints exposed
 
-- `GET /healthz` (health probe) in `src/zeroveil_community/app.py`.
-- `POST /v1/chat/completions` (gateway API) in `src/zeroveil_community/app.py` accepting request JSON plus `Authorization: Bearer ...` and optional `X-Zeroveil-Tenant`.
+- `GET /healthz` (health probe) in `src/zeroveil_gateway/app.py`.
+- `POST /v1/chat/completions` (gateway API) in `src/zeroveil_gateway/app.py` accepting request JSON plus `Authorization: Bearer ...` and optional `X-Zeroveil-Tenant`.
 
 ### Configuration files (policy.json, tenants.json)
 
@@ -67,7 +67,7 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 
 ### Audit logs
 
-- Default sink is JSONL to `logs/audit.jsonl` (path and retention configured in `policies/default.json`), written by `src/zeroveil_community/audit.py`.
+- Default sink is JSONL to `logs/audit.jsonl` (path and retention configured in `policies/default.json`), written by `src/zeroveil_gateway/audit.py`.
 - Logs include decisions and request metadata (counts/sizes/latency), not prompt/response content, unless modified by the operator.
 
 ### Environment variables (API keys)

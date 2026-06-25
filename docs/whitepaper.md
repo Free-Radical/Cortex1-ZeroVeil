@@ -192,7 +192,7 @@ Target behavior after rollout: provider sees one source, not individual users.
 
 The rejection response tells you what was detected, so you can fix it locally before retrying.
 
-For proactive scrubbing, use the ZeroVeil SDK (local-only, source-available under BSL) or your own tooling.
+For proactive scrubbing, use the ZeroVeil SDK (local-only, source-available under the repository license) or your own tooling.
 
 ---
 
@@ -202,7 +202,7 @@ For proactive scrubbing, use the ZeroVeil SDK (local-only, source-available unde
 |------------|---------------|---------------------|
 | Bastio, Portkey | Cloud scrubbing | We reject, not scrub—your PII never reaches us |
 | LiteLLM + Presidio | DIY toolkit | We provide compliance-ready audit + gateway out of box |
-| Kong Enterprise | Enterprise pricing | Developer-friendly, source-available core (BSL) |
+| Kong Enterprise | Enterprise pricing | Developer-friendly, source-available noncommercial core |
 | Bedrock/Model Armor | Single provider | Provider-agnostic, works with any endpoint |
 | **All of them** | No correlation resistance | `PLANNED_COMMUNITY`: design reduces user-to-prompt linkability through mixing |
 
@@ -303,7 +303,7 @@ export ZEROVEIL_UPSTREAM_URL="https://api.openai.com/v1"
 export ZEROVEIL_API_KEY="your-openai-key"
 
 # Run
-python -m zeroveil_community
+python -m zeroveil_gateway
 
 # Use in your app
 client = OpenAI(base_url="http://localhost:8000/v1")
