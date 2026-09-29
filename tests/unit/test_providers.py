@@ -213,6 +213,74 @@ class TestOpenRouterProvider:
         assert payload["model"] == OPENROUTER_CONFIG.default_model
 
     @patch("zeroveil_gateway.providers.openrouter.httpx.Client")
+    def test_chat_completions_zdr_provider_block(
+        self, mock_client_cls: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Outbound payload must carry the enforced ZDR provider settings."""
+        monkeypatch.setenv("OPENROUTER_API_KEY", "sk-test-123")
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "model": "meta-llama/llama-3.1-8b-instruct",
+            "choices": [{"message": {"content": "Hi"}, "finish_reason": "stop"}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+        }
+
+        mock_post = mock_client_cls.return_value.__enter__.return_value.post
+        mock_post.return_value = mock_response
+
+        provider = OpenRouterProvider()
+        provider.chat_completions(messages=[{"role": "user", "content": "Hi"}])
+
+        call_args = mock_post.call_args
+        payload = call_args.kwargs["json"]
+        assert payload["provider"] == {
+            "zdr": True,
+            "data_collection": "deny",
+            "allow_fallbacks": False,
+        }
+
+    @patch("zeroveil_gateway.providers.openrouter.httpx.Client")
+    def test_chat_completions_zdr_overrides_client_provider(
+        self, mock_client_cls: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A caller-supplied weaker provider block must not weaken ZDR."""
+        monkeypatch.setenv("OPENROUTER_API_KEY", "sk-test-123")
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "model": "meta-llama/llama-3.1-8b-instruct",
+            "choices": [{"message": {"content": "Hi"}, "finish_reason": "stop"}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+        }
+
+        mock_post = mock_client_cls.return_value.__enter__.return_value.post
+        mock_post.return_value = mock_response
+
+        provider = OpenRouterProvider()
+        weak_client_provider = {
+            "zdr": False,
+            "data_collection": "allow",
+            "allow_fallbacks": True,
+            "order": ["some-upstream"],
+        }
+        provider.chat_completions(
+            messages=[{"role": "user", "content": "Hi"}],
+            provider=weak_client_provider,
+        )
+
+        call_args = mock_post.call_args
+        payload = call_args.kwargs["json"]
+        # The gateway's ZDR values win over the caller's weaker request.
+        assert payload["provider"]["zdr"] is True
+        assert payload["provider"]["data_collection"] == "deny"
+        assert payload["provider"]["allow_fallbacks"] is False
+        # Non-conflicting caller keys are preserved.
+        assert payload["provider"]["order"] == ["some-upstream"]
+
+    @patch("zeroveil_gateway.providers.openrouter.httpx.Client")
     def test_chat_completions_api_error(
         self, mock_client_cls: MagicMock, monkeypatch: pytest.MonkeyPatch
     ) -> None:

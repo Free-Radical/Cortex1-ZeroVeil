@@ -25,6 +25,28 @@ OPENROUTER_CONFIG = ProviderConfig(
     },
 )
 
+# ZDR (zero data retention) provider settings that every outbound OpenRouter
+# request must carry. These values always win: a caller-supplied "provider"
+# block may add other keys, but it can never weaken zdr, data_collection or
+# allow_fallbacks below what is enforced here.
+ZDR_PROVIDER_SETTINGS: dict[str, object] = {
+    "zdr": True,
+    "data_collection": "deny",
+    "allow_fallbacks": False,
+}
+
+
+def _merged_zdr_provider(client_provider: dict[str, object] | None) -> dict[str, object]:
+    """Merge a caller-supplied provider block with the enforced ZDR settings.
+
+    Any keys the caller supplies are kept (e.g. "order", "quantizations"),
+    but zdr / data_collection / allow_fallbacks are always forced to the
+    enforced values, regardless of what the caller sent for them.
+    """
+    merged: dict[str, object] = dict(client_provider or {})
+    merged.update(ZDR_PROVIDER_SETTINGS)
+    return merged
+
 
 class OpenRouterProvider(ProviderAdapter):
     """OpenRouter LLM provider adapter."""
@@ -36,12 +58,18 @@ class OpenRouterProvider(ProviderAdapter):
         self,
         messages: list[dict[str, str]],
         model: str | None = None,
+        provider: dict[str, object] | None = None,
     ) -> ProviderResponse:
         """Send chat completion request to OpenRouter.
 
         Args:
             messages: List of message dicts with 'role' and 'content' keys.
             model: Model to use. If None, uses config.default_model.
+            provider: Optional caller-supplied OpenRouter "provider" block
+                (e.g. routing preferences). The gateway's ZDR enforcement
+                (zdr=True, data_collection="deny", allow_fallbacks=False)
+                always overrides these three keys in the merged block; other
+                caller-supplied keys are preserved as-is.
 
         Returns:
             ProviderResponse with content and token usage.
@@ -63,6 +91,7 @@ class OpenRouterProvider(ProviderAdapter):
         payload = {
             "model": selected_model,
             "messages": messages,
+            "provider": _merged_zdr_provider(provider),
         }
 
         try:

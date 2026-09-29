@@ -62,12 +62,16 @@ class ProviderAdapter(ABC):
         self,
         messages: list[dict[str, str]],
         model: str | None = None,
+        provider: dict[str, object] | None = None,
     ) -> ProviderResponse:
         """Send chat completion request to provider.
 
         Args:
             messages: List of message dicts with 'role' and 'content' keys.
             model: Model to use. If None, uses config.default_model.
+            provider: Optional provider-routing block. Adapters that support
+                zero-data-retention enforcement (e.g. OpenRouter) must ensure
+                their own ZDR settings win over any caller-supplied values.
 
         Returns:
             ProviderResponse with content and token usage.
