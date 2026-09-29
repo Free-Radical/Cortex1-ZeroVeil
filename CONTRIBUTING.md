@@ -1,6 +1,6 @@
 # Contributing to Cortex1-ZeroVeil (Community Gateway)
 
-This repository is source-available under Business Source License 1.1 (`LICENSE`). We welcome contributions that improve safety, correctness, and adoption.
+This repository is source-available under PolyForm Noncommercial 1.0.0 (`LICENSE`). We welcome contributions that improve safety, correctness, and adoption.
 
 ## Ground Rules (Safety + Claims)
 
@@ -12,17 +12,11 @@ This repository is source-available under Business Source License 1.1 (`LICENSE`
 
 ### 1) CLA (Required)
 
-By submitting a pull request, you agree to the **license-grant CLA** in `CLA.md`. You keep ownership of your contributions; you grant the Project the rights needed to distribute and (later) transition to Apache 2.0 per the Change Date in `LICENSE`.
+Contributions are accepted under `CLA.md` (a license grant, you keep ownership) via a DCO `Signed-off-by` line. Pseudonymous handles are fine; we only need a consistent identity and a working email.
 
-If CLA checks are enabled, the bot will prompt you to comment:
+### 2) Sign your commits (Required)
 
-`I have read the CLA Document and I hereby sign the CLA`
-
-You only need to do this once.
-
-### 2) Sign your commits (Recommended)
-
-We recommend using DCO-style sign-offs on commits:
+Every commit needs a DCO sign-off:
 
 ```bash
 git commit -s -m "Your message"

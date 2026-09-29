@@ -1,7 +1,7 @@
 # ZeroVeil Contributor License Agreement (CLA) — License Grant (No Assignment)
 
-Version: 0.1  
-Last updated: 2025-12-28  
+Version: 0.2  
+Last updated: 2026-10-01  
 Project: Cortex1-ZeroVeil (the “Project”)
 
 This Contributor License Agreement (“Agreement”) is intended to clarify the intellectual property license granted with Contributions to the Project. It is for the protection of both the Contributor and the Project.
@@ -28,12 +28,13 @@ If You institute patent litigation against any entity alleging that the Project 
 
 ## 4. Outbound Licensing / Future License Changes
 
-You agree that the Licensor may distribute the Project (including Your Contributions) under:
+You agree that the Licensor may distribute the Project (including Your Contributions):
 
-1) the Project’s current license terms (currently Business Source License 1.1 as described in `LICENSE`), and  
-2) any future license terms the Licensor publishes for the Project, including the Project’s stated Change License (currently Apache License 2.0 per `LICENSE`).
+1) under the Project’s current license terms (currently PolyForm Noncommercial License 1.0.0, as described in `LICENSE`),
+2) under any commercial license the Licensor offers for the Project (see `COMMERCIAL-LICENSE.md`), and
+3) under any later license terms the Licensor publishes for the Project.
 
-This section is intended to avoid the need to re-contact every Contributor if the Project’s license changes at the stated Change Date (or earlier if the Licensor chooses to shorten it as permitted by the Project license).
+This section is intended to avoid the need to re-contact every Contributor each time the Licensor changes how the Project is licensed.
 
 ## 5. Representations
 
@@ -49,9 +50,9 @@ Except for the representations in Section 5, You provide Your Contributions “A
 
 ## 7. How You Accept This CLA
 
-By submitting a Contribution to the Project, You agree to the terms of this Agreement.
+By submitting a Contribution to the Project, You agree to the terms of this Agreement. Acceptance is recorded by a Developer Certificate of Origin (DCO) `Signed-off-by:` line on each commit (e.g. via `git commit -s`).
 
-The Project may use an automated CLA check (e.g., a CLA bot/app) and/or require confirmation on a pull request before accepting non-trivial Contributions.
+A consistent handle plus a working email address is enough to sign off — your legal name is not required, and pseudonymous contributors are welcome.
 
 ---
 

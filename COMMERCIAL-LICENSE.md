@@ -21,7 +21,7 @@ for or directed toward commercial advantage or monetary compensation,
 including for example:
 - selling software, services, or access built from or around this repository
 - hosted, managed-service, SaaS, API, relay, gateway, or multi-tenant use
-- internal business use by a company, consultancy, startup, or nonprofit in
+- internal business use by a company, consultancy, or startup in
   support of operations, revenue, clients, or fundraising
 - contractor or employee use on behalf of an organization
 - bundling this repository into a paid or revenue-generating product
@@ -30,5 +30,7 @@ including for example:
   commercial offering
 
 If you are unsure whether your use is commercial, ask first.
+
+Companies may evaluate for 32 days under LICENSE-FREE-TRIAL; after that, contact us.
 
 Contact: Saqib.Khan@Me.com

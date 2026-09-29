@@ -1,5 +1,6 @@
 Required Notice: Copyright 2025 Saqib Ali Khan.
 Required Notice: Cortex1-ZeroVeil is licensed under the PolyForm Noncommercial License 1.0.0.
+Required Notice: Commercial evaluation: PolyForm Free Trial License 1.0.0 (32 days), see LICENSE-FREE-TRIAL.
 
 # Notice
 
