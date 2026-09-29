@@ -4,15 +4,13 @@ This file tracks the **weekly execution plan** for the **Community Gateway** (th
 
 ## Core Innovation & MVP
 
-**Foundation:** Unique LLM mixer/privacy relay architecture (the moat)
-- Breaks user<->prompt correlation at the provider level
-- Multi-tenant aggregation through shared relay identity
-- No other solution offers provider-side correlation resistance
+**Foundation:** DLP gateway enforcement (implemented, this repo's core).
+A mixer/aggregation design exists as research only in `docs/mixer-design.md`;
+it is not implemented and not claimed as a shipped or near-term feature.
 
 **MVP Deliverable:** DLP Gateway for developers and enterprises
 - OpenAI-compatible proxy with DLP controls for any LLM endpoint
 - Two audiences: developers building regulated apps + enterprise IT controlling access
-- Routes directly to providers OR forwards to ZeroVeil mixer
 - PII rejection, model allowlists, rate limits, audit logging
 
 Both the mixer and gateway share the same core: policy enforcement, provider routing, audit logging. See `docs/architecture.md` for deployment topologies.
@@ -67,21 +65,9 @@ Both the mixer and gateway share the same core: policy enforcement, provider rou
 - Keyword blocking for content policy
 - Enhanced PII rejection with entity type breakdown in error responses
 
-## Week 5 (Mixer Primitives + Cost Controls)
+## Week 5 (Cost Controls; Mixer Design Remains Research-Only)
 
-Full mixer implementation for both Community and Pro editions. See `docs/mixer-design.md` for technical details.
-
-**Mixer Primitives (both editions):**
-- Request batching with configurable windows (min_batch, max_wait)
-- Shuffle dispatch (randomized order within batches)
-- Timing jitter (50-200ms random delays)
-- Header stripping (remove tenant-identifying metadata)
-- Request normalization (strip fingerprinting vectors)
-- One-time response tokens (unlinkable return routing)
-
-**Cloud-Hosted (both editions):**
-- Shared relay identity (ZeroVeil-operated API keys)
-- Network effect: larger mixing pool = stronger correlation resistance
+Mixer/aggregation is a research design in `docs/mixer-design.md`. It is not scheduled, not implemented, and not claimed as a feature of any edition; this section only tracks cost/rate work.
 
 **Corporate Gateway - Cost & Rate Controls:**
 - Per-tenant rate limiting (requests/minute)
@@ -139,6 +125,6 @@ Full mixer implementation for both Community and Pro editions. See `docs/mixer-d
 
 ## ZeroVeil SDK Visibility
 
-- SDK is source-available under BSL (same as gateway)
+- SDK is source-available under PolyForm Noncommercial 1.0.0 (same as gateway)
 - Early access is invite-only during initial development
 - TODO: Open public access when ready for broad adoption

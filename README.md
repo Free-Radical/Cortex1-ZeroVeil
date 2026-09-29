@@ -1,39 +1,53 @@
-# Cortex1-ZeroVeil
+# ZeroVeil (community gateway)
 
-> **License:** Source-available under PolyForm Noncommercial 1.0.0. Personal, hobby, educational, research, evaluation, and other noncommercial use are allowed. Commercial, hosted, customer-facing, internal business, paid, or other monetized use requires a separate written license. See `LICENSE`, `NOTICE.md`, and `COMMERCIAL-LICENSE.md`.
+**An LLM gateway you run yourself. It won't forward a prompt unless the rules are met, and it keeps a record of every decision without keeping the words.**
 
-**DLP Controls for Any LLM API**
+You put ZeroVeil between your app and a hosted model API (it speaks the OpenAI chat format). Every request has to clear three checks, and if any one fails, the request goes nowhere:
 
-*For Developers Building Regulated Apps and Enterprise IT Teams*
+- **Zero data retention, requested.** ZeroVeil asks the provider for zero data retention and refuses to fall back to a provider that won't honor it.
+- **Redaction, attested.** The client has to state that the prompt was redacted (`metadata.scrubbed: true`). ZeroVeil also runs its own sensitive-data check and blocks what it catches. The attestation is a declared flag, not a cryptographic proof.
+- **Audit, without the content.** Each allow/deny decision is written to an audit log that holds metadata only: no prompt text, no response text.
 
-Part of the Cortex1 family of privacy-first AI infrastructure.
+That's the whole pitch. It lowers your risk; it doesn't guarantee it. ZeroVeil doesn't make you anonymous to the provider, and it isn't a compliance certification.
 
----
+> License: source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
 
-## Repo Tier and Access
-
-- **Tier:** Community / Public / Noncommercial
-- Audience: personal users, researchers, and developers evaluating or using the community gateway for noncommercial purposes.
-- Commercial note: paid, hosted, customer-facing, internal business, or other monetized use requires a separate written commercial license.
-- Pro note: commercially licensed paid features live in `zeroveil-gateway-pro` and `zeroveil-pro`.
-
-## Quick Start (Community Gateway)
+## Try it (about 5 minutes)
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -U pip
-python -m pip install -e .[dev]
+python -m venv .venv && source .venv/bin/activate
+python -m pip install -U pip && python -m pip install -e .[dev]
 
-# Required for provider calls
-export ZEROVEIL_API_KEY="your-provider-api-key"
+# Inbound auth (the gateway's own key). tenants/default.json ships with a
+# placeholder that will not match any real token, so point ZEROVEIL_TENANTS_PATH
+# at a path that does not exist to use single-key auth for this demo:
+export ZEROVEIL_TENANTS_PATH=/tmp/no-such-tenants.json
+export ZEROVEIL_API_KEY="demo-key-change-me"
 
-# Start gateway (OpenAI-compatible endpoint on :8000)
-python -m zeroveil_gateway
+# Outbound provider key (OpenRouter), used once a request passes policy:
+export OPENROUTER_API_KEY="your-openrouter-api-key"
 
-# Smoke check
-curl http://127.0.0.1:8000/healthz
+python -m zeroveil_gateway          # OpenAI-compatible endpoint on :8000
+curl http://127.0.0.1:8000/healthz  # {"ok":true}
 ```
+
+Send a request without the redaction attestation and watch it get refused:
+
+```bash
+curl -X POST http://127.0.0.1:8000/v1/chat/completions \
+  -H "Authorization: Bearer demo-key-change-me" \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"hi"}],"zdr_only":true}'
+# 403 policy_denied: "Scrub attestation required (metadata.scrubbed=true)."
+```
+
+That refusal is the product.
+
+## What's not here
+
+The mixer/aggregation design in `docs/mixer-design.md` is research. It isn't built, and we don't claim it. Paid features live in a separate commercial edition.
+
+---
 
 ## Development and Test
 
@@ -50,11 +64,11 @@ python scripts/demo_gateway.py
 
 ## Core Configuration
 
-- `ZEROVEIL_API_KEY`: upstream provider key used by the gateway.
+- `ZEROVEIL_API_KEY`: the gateway's own inbound auth key (legacy single-tenant mode, used only when `ZEROVEIL_TENANTS_PATH` does not resolve to a valid tenants file).
+- `OPENROUTER_API_KEY`: the outbound OpenRouter provider key (no `ZEROVEIL_` prefix).
 - `ZEROVEIL_POLICY_PATH`: policy JSON path (default `policies/default.json`).
-- `ZEROVEIL_TENANTS_PATH`: tenant config JSON path (default `tenants/default.json`).
-- `ZEROVEIL_STUB_MODE`: set `1`/`true` for local stub mode.
-- `ZEROVEIL_OPENROUTER_API_KEY`: OpenRouter key when routing via OpenRouter.
+- `ZEROVEIL_TENANTS_PATH`: tenant config JSON path (default `tenants/default.json`); when it loads, per-tenant API keys (sha256 hashes) are required instead of `ZEROVEIL_API_KEY`.
+- `ZEROVEIL_STUB_MODE`: set `1`/`true` for local stub mode (skips the outbound provider call).
 
 ## Related ZeroVeil Repos
 
@@ -77,7 +91,7 @@ client = OpenAI(base_url="https://your-zeroveil/v1")
 
 1. **We reject PII, we don't scrub it.** If you send us data to "clean," you've already exposed it. ZeroVeil detects PII patterns and blocks the request—your sensitive data never leaves your environment.
 
-2. **Provider-side correlation resistance (`PLANNED_COMMUNITY`).** Mixer primitives are planned for Week 5. Current releases provide DLP gateway controls; correlation-resistance claims apply after mixer rollout.
+2. **DLP gateway controls, enforced today.** Policy enforcement, PII rejection, and metadata-only audit logging are implemented now.
 
 3. **Works with any OpenAI-compatible endpoint.** Direct providers (OpenAI, Anthropic), aggregators (OpenRouter, Together AI), or self-hosted models (vLLM, Ollama).
 
@@ -93,7 +107,7 @@ You're building an app that calls LLM APIs and handles PHI, PII, or PCI data. Ho
 |--------|---------|
 | Build your own | Time, expertise, ongoing maintenance |
 | Enterprise gateways (Kong, Securiti) | Enterprise pricing, enterprise sales cycle |
-| Open-source toolkits (LiteLLM + Presidio) | No compliance artifacts, DIY audit logging |
+| DIY toolkits (LiteLLM + Presidio) | No compliance artifacts, DIY audit logging |
 | Cloud scrubbing (Strac, Private AI) | You send them your PII first—defeats the purpose |
 | Provider guardrails (Bedrock, Model Armor) | Single-provider lock-in |
 
@@ -171,35 +185,14 @@ Companies are responding with blanket bans:
 - Block direct provider access at firewall
 - Per-department budgets and model restrictions
 - Compliance-ready audit trails
-- `PLANNED_COMMUNITY`: Optional mixer routing for correlation resistance (Week 5 target)
 
-**Pro roadmap: Scrubbing webhook integration.** For enterprises with existing data cleaning pipelines, ZeroVeil can optionally forward blocked requests to your scrubbing service. Your service cleans the data using your approved methods, then retries through ZeroVeil. ZeroVeil never touches your data—but integrates with your existing compliance infrastructure.
-
----
-
-## Planned Innovation: Mixer Architecture (`PLANNED_COMMUNITY`)
-
-This is a design target for the Community roadmap (not active in Week 2 builds).
-
-```
-User A --->
-User B --+--> [ZeroVeil Mixer] ---> Shared Identity ---> Cloud LLM
-User C --->
-```
-
-**How it is planned to work:**
-- Aggregates requests from multiple tenants through a shared relay identity
-- Provider sees one source, not individual users
-- Timing jitter and batching reduce fingerprinting
-- Response routing via one-time tokens (unlinkable)
-
-**Why this matters:**
-- Even with "zero data retention," providers see who sent each prompt in real-time
-- API key breaches expose user-to-prompt history
-- Metadata accumulation enables competitive intelligence and legal exposure
-- **Design goal:** reduce provider-side correlation risk through mixing once primitives ship
+**Pro roadmap: redaction webhook integration.** For enterprises with existing data-cleaning pipelines, ZeroVeil can optionally forward blocked requests to your redaction service. Your service cleans the data using your approved methods, then retries through ZeroVeil. ZeroVeil never touches your data—but integrates with your existing compliance infrastructure.
 
 ---
+
+## Research: Mixer / Aggregation Design
+
+A design for reducing provider-side correlation risk through request aggregation is documented in `docs/mixer-design.md`. It is research only: not implemented, not shipped, and not claimed as a feature of any current release.
 
 ## Why We Reject, Not Scrub
 
@@ -212,7 +205,7 @@ User C --->
 
 **The rejection response tells you what was detected**, so you can fix it locally before retrying.
 
-For proactive scrubbing, use the ZeroVeil SDK (local-only, source-available under BSL) or your own tooling.
+For proactive redaction, use the ZeroVeil SDK (local-only, source-available under PolyForm Noncommercial 1.0.0) or your own tooling.
 
 ---
 
@@ -222,9 +215,9 @@ For proactive scrubbing, use the ZeroVeil SDK (local-only, source-available unde
 |------------|---------------|---------------------|
 | Bastio, Portkey | Cloud scrubbing | We reject, not scrub—your PII never reaches us |
 | LiteLLM + Presidio | DIY toolkit | We provide compliance-ready audit + gateway out of box |
-| Kong Enterprise | Enterprise pricing | Developer-friendly, source-available core (BSL) |
+| Kong Enterprise | Enterprise pricing | Developer-friendly, source-available core (PolyForm Noncommercial 1.0.0) |
 | Bedrock/Model Armor | Single provider | Provider-agnostic, works with any endpoint |
-| **All of them** | No correlation resistance | `PLANNED_COMMUNITY`: design reduces user-to-prompt linkability through mixing |
+| **All of them** | — | ZeroVeil does not claim correlation resistance or anonymity; see `docs/mixer-design.md` for research-only work in this area |
 
 ---
 
@@ -288,7 +281,7 @@ Both Community and Pro are available **self-hosted** or **cloud-hosted**:
 | **Cloud-Hosted** | Shared (ZeroVeil-operated) | High (network effect) | Most users |
 | **Self-Hosted** | Your own API keys | None (unless multi-tenant) | Air-gap, data sovereignty |
 
-**Recommendation:** For small-to-medium organizations, **cloud-hosted is preferable** because larger mixing pools provide stronger correlation resistance.
+**Recommendation:** For small-to-medium organizations, cloud-hosted is preferable for ease of operation. (This is not a correlation-resistance or anonymity claim.)
 
 ---
 
@@ -313,7 +306,7 @@ Contact: Saqib.Khan@Me.com for access.
 
 ## Status
 
-**Week 2 complete.** DLP gateway is implemented; mixer primitives are planned for Week 5.
+**Status:** DLP gateway is implemented and enforced. Mixer/aggregation is research only (see `docs/mixer-design.md`); it is not built and not claimed as a feature.
 
 | Component | Status |
 |-----------|--------|
@@ -322,9 +315,8 @@ Contact: Saqib.Khan@Me.com for access.
 | Multi-tenant auth | Done |
 | Audit logging (metadata-only) | Done |
 | Provider routing | Stubbed (Week 3) |
-| Mixer primitives | Week 5 (batching, shuffle, jitter, header stripping) |
 
-**Roadmap:** `IMPLEMENTED_NOW` DLP Gateway → `PLANNED_COMMUNITY` Mixer primitives → `PLANNED_COMMUNITY` Multi-provider support → Public release
+**Roadmap:** `IMPLEMENTED_NOW` DLP Gateway → `PLANNED_COMMUNITY` Multi-provider support → Public release
 
 ---
 
@@ -340,7 +332,7 @@ Contact: Saqib.Khan@Me.com for access.
 ## Contributing
 
 Looking for contributors interested in privacy-first AI infrastructure. If you care about:
-- LLM privacy and correlation risk reduction
+- LLM data-loss-prevention (DLP) gateway controls
 - Zero-trust architecture
 - Building the missing privacy layer for AI
 

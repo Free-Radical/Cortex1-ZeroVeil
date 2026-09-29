@@ -1,5 +1,7 @@
 # Mixer Design
 
+> **Research design, not built.** This document describes a research direction only. It is not implemented in any current release and is not claimed as a product feature (no anonymity, unlinkability, or correlation-resistance guarantee is made).
+
 Technical specification for ZeroVeil's request mixing system.
 
 **Goal:** Break the correlation between tenant identity and request content at the provider level.

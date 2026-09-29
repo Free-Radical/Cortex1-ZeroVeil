@@ -334,6 +334,6 @@ This is privacy done right.
 
 **Author:** Saqib Ali Khan
 **Contact:** Saqib.Khan@Me.com
-**Repository:** https://github.com/Free-Radical/Cortex1-ZeroVeil
+**Repository:** https://github.com/ZeroVeilAI/zeroveil
 
 *The privacy layer for AI that should have existed from day one.*
