@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZeroVeil</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #555555;
+    --border: #e0e0e0;
+    --accent: #0c447c;
+    --card-bg: #f7f7f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a;
+      --fg: #f0f0ee;
+      --muted: #b6b6b0;
+      --border: #33353a;
+      --accent: #85b7eb;
+      --card-bg: #1c1f24;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    padding: 16px;
+  }
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 0 48px;
+  }
+  h1 {
+    font-size: 28px;
+    margin: 0 0 8px;
+  }
+  .hero {
+    font-size: 18px;
+    color: var(--fg);
+    margin: 0 0 28px;
+  }
+  ul.checks {
+    list-style: none;
+    margin: 0 0 28px;
+    padding: 0;
+  }
+  ul.checks li {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    font-size: 15px;
+  }
+  ul.checks li strong {
+    display: block;
+    margin-bottom: 4px;
+  }
+  .disclaimer {
+    font-size: 14px;
+    color: var(--muted);
+    border-left: 3px solid var(--border);
+    padding-left: 14px;
+    margin: 0 0 28px;
+  }
+  .license {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 28px;
+  }
+  a {
+    color: var(--accent);
+  }
+  .links {
+    font-size: 15px;
+    margin: 0 0 8px;
+  }
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>ZeroVeil</h1>
+  <p class="hero">An LLM gateway you run yourself. It won't forward a prompt unless the rules are met, and it keeps a record of every decision without keeping the words.</p>
+
+  <ul class="checks">
+    <li><strong>Zero data retention, requested.</strong> ZeroVeil asks the provider for zero data retention and refuses to fall back to a provider that won't honor it.</li>
+    <li><strong>Redaction, attested.</strong> The client has to state that the prompt was redacted. ZeroVeil also runs its own sensitive-data check and blocks what it catches.</li>
+    <li><strong>Audit, without the content.</strong> Each allow/deny decision is written to an audit log that holds metadata only: no prompt text, no response text.</li>
+  </ul>
+
+  <p class="disclaimer">It lowers your risk; it doesn't guarantee it. ZeroVeil doesn't make you anonymous to the provider, and it isn't a compliance certification.</p>
+
+  <p class="links"><a href="https://github.com/ZeroVeilAI/zeroveil">View the source on GitHub</a></p>
+
+  <p class="license">License: source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.</p>
+
+  <p class="links">Commercial license: <a href="mailto:Saqib.Khan@Me.com">Saqib.Khan@Me.com</a></p>
+
+  <footer>&copy; 2026 Saqib A. Khan</footer>
+</main>
+</body>
+</html>
