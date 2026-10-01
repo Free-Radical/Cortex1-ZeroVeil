@@ -131,7 +131,7 @@ ZeroVeil Pro provides pre-built documentation packages for customer audits:
 | HITRUST | Planned | Customer-driven |
 | FedRAMP | Future | Government contract dependent |
 
-*Note: ZeroVeil Pro is designed to support customers' compliance programs today. Formal certifications for ZeroVeil Hosted will be pursued as scale justifies audit costs.*
+*Note: ZeroVeil Pro is designed to support customers' compliance programs today. Formal certifications are on the roadmap pending scale.*
 
 ---
 

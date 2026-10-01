@@ -172,7 +172,7 @@ Mixing Pool Size → Correlation Resistance
    500 tenants  → ~99.8% (very strong)
 ```
 
-**This is why cloud-hosted is recommended for small organizations once mixer primitives are enabled.**
+**A cloud-hosted deployment would be recommended for small organizations if a mixer were ever built (research design; not implemented, not scheduled).**
 
 Self-hosting only provides policy enforcement and ZDR routing — no mixing benefit unless you have multiple internal tenants.
 

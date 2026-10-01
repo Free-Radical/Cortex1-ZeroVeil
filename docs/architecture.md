@@ -178,7 +178,7 @@ We are implementing periodic reviews of supported LLM providers to optimize rout
 - ZDR policy compliance status
 - Reliability and uptime history
 
-Tier escalation and automated pricing/cost policy are **Pro/Hosted** responsibilities. The Community gateway stays conservative and auditable; it provides policy enforcement and provider adapter primitives.
+Tier escalation and automated pricing/cost policy are **Pro** responsibilities. The Community gateway stays conservative and auditable; it provides policy enforcement and provider adapter primitives.
 
 **Aggregation Benefits (research, not implemented):**
 If a future aggregation/mixer design ships, it may also carry an economic benefit:
@@ -214,8 +214,8 @@ Contact Saqib.Khan@Me.com for Pro tier access.
 | HYBRID | CPU (16GB+ RAM) | Local preprocessing, relay for complex tasks |
 | CLOUD_ONLY | Minimal | Relay with mandatory local PII scrubbing |
 
-**Pro/Hosted routing policy:**
-- Tier escalation and cost-optimized routing (if used) are Pro/Hosted features and should not be required to adopt the Community gateway.
+**Pro routing policy:**
+- Tier escalation and cost-optimized routing (if used) are Pro features and should not be required to adopt the Community gateway.
 
 *Note: Device detection and local-first routing occur client-side. The gateway handles policy enforcement and provider routing for cloud-bound requests only.*
 

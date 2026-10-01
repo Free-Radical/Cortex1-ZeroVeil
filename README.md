@@ -272,7 +272,7 @@ Enterprise features on top of Community:
 - Admin dashboard UI (requests, blocks, costs by tenant)
 - SIEM webhook integration
 
-*Formal certifications for ZeroVeil Hosted on roadmap pending scale.*
+*Formal certifications are on the roadmap pending scale.*
 
 See [docs/compliance.md](docs/compliance.md) for detailed control mappings.
 

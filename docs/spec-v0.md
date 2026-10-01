@@ -191,4 +191,4 @@ Default intent: **no prompt/response content logging**.
 
 ### Retention
 
-v0: whatever the operator configures for the metadata log file. Hosted offering will define defaults and explicit retention controls.
+v0: whatever the operator configures for the metadata log file. No defaults are imposed.

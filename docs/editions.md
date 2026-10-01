@@ -23,7 +23,7 @@ commercial license.
 | | SDK | SDK Pro | Gateway Community | Gateway Pro |
 |---|---|---|---|---|
 | **License** | PolyForm NC | PolyForm NC + paid license | PolyForm NC | PolyForm NC + paid license |
-| **Runs where** | Client machine | Client machine | Self-hosted | Self-hosted or hosted |
+| **Runs where** | Client machine | Client machine | Self-hosted | Self-hosted |
 | **Cost** | Source-available, no fee | Paid license | Source-available, no fee | Paid license |
 | | | | | |
 | **PII scrubbing (local)** | Presidio backend only | Presidio + regex + scrubadub | — | — |
@@ -61,7 +61,7 @@ commercial license.
 
 1. **SDK** — Run locally, read the source, verify it works. Zero trust required.
 2. **Gateway Community** — Self-hosted, read the source, verify no content logging. Minimal trust.
-3. **Gateway Pro** — Hosted option, signed audit logs prove behavior. Moderate trust.
+3. **Gateway Pro** — Self-hosted, signed audit logs prove behavior. Moderate trust.
 
 ---
 
