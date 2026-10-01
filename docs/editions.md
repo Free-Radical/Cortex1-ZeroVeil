@@ -6,8 +6,10 @@ This repository is the **Community Gateway**: the source-available, noncommercia
 
 ## Overview
 
-ZeroVeil ships two product lines:
-- **SDKs** (client-side libraries) — scrub PII locally before requests leave the client
+> **The SDKs are not part of this repository or of v0.2.0 and are not publicly available.** Only the Community Gateway is available. The SDK columns below describe a product split, not available software.
+
+ZeroVeil's product lines:
+- **SDKs** (client-side libraries, not available) — would scrub PII locally before requests leave the client
 - **Gateways** (server-side proxies) — enforce policy and audit
 
 Source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial 1.0.0 (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
@@ -22,7 +24,7 @@ commercial license.
 
 | | SDK | SDK Pro | Gateway Community | Gateway Pro |
 |---|---|---|---|---|
-| **License** | PolyForm NC | PolyForm NC + paid license | PolyForm NC | PolyForm NC + paid license |
+| **License** | PolyForm NC + Free Trial (32 days) | PolyForm NC + Free Trial (32 days) + paid license | PolyForm NC + Free Trial (32 days) | PolyForm NC + Free Trial (32 days) + paid license |
 | **Runs where** | Client machine | Client machine | Self-hosted | Self-hosted |
 | **Cost** | Source-available, no fee | Paid license | Source-available, no fee | Paid license |
 | | | | | |
@@ -59,7 +61,7 @@ commercial license.
 
 ## Trust Funnel
 
-1. **SDK** — Run locally, read the source, verify it works. Zero trust required.
+1. **SDK** (not available) — Would run locally. Zero trust required.
 2. **Gateway Community** — Self-hosted, read the source, verify no content logging. Minimal trust.
 3. **Gateway Pro** — Self-hosted, signed audit logs prove behavior. Moderate trust.
 
@@ -77,7 +79,7 @@ Open WebUI speaks OpenAI-compatible API natively. Point its `OPENAI_API_BASE` at
 |---|---|---|
 | Gateway + Open WebUI | Chat UI + DLP gateway, cloud models via OpenRouter | Power user or corporate ChatGPT replacement |
 | Gateway + Open WebUI + Ollama | Chat UI + DLP gateway + local models, no cloud keys needed | Air-gapped or fully local deployment |
-| Gateway only (no UI) | OpenAI-compatible API proxy | Developers integrating via SDK or `OPENAI_API_BASE` |
+| Gateway only (no UI) | OpenAI-compatible API proxy | Developers integrating via `OPENAI_API_BASE` |
 
 ### Corporate Chatbot Replacement
 

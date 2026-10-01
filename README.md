@@ -197,7 +197,7 @@ A design for aggregating requests through a shared relay credential is documente
 
 **The rejection response tells you what was detected**, so you can fix it locally before retrying.
 
-For proactive redaction, use the ZeroVeil SDK (local-only, source-available under PolyForm Noncommercial 1.0.0) or your own tooling.
+For proactive redaction, scrub locally with your own tooling (for example Presidio) before sending.
 
 ---
 

@@ -81,14 +81,11 @@ This separation is intentional:
 
 ### Scrubbing Tooling
 
-ZeroVeil SDK provides source-available local scrubbing tooling:
+Scrub locally with your own tooling (for example Presidio) before sending. ZeroVeil ships no scrubbing tool in v0.2.0:
 - **Local-only**: Runs entirely in your environment—your data never leaves
-- **Auditable**: reviewable and testable
-- **Optional**: Not part of the gateway—use your own scrubbing if preferred
+- **Optional**: Not part of the gateway
 
 ZeroVeil never asks you to send raw PII to a service for scrubbing.
-
-For advanced requirements (reversible tokens, multiple backends, audit logging), see ZeroVeil Pro.
 
 ---
 
