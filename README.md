@@ -259,12 +259,6 @@ See [docs/architecture.md](docs/architecture.md) for Corporate AI Gateway deploy
 
 ZeroVeil v0.2.0 is self-hosted only. There is no ZeroVeil-operated hosted service.
 
---------|----------------|----------------|----------|
-| **Cloud-Hosted** | Shared (ZeroVeil-operated) | High (network effect) | Most users |
-| **Self-Hosted** | Your own API keys | None (unless multi-tenant) | Air-gap, data sovereignty |
-
-**Recommendation:** For small-to-medium organizations, cloud-hosted is preferable for ease of operation. (This is not a correlation-resistance or anonymity claim.)
-
 ---
 
 ## ZeroVeil Pro
