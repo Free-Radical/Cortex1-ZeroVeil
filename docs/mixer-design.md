@@ -6,7 +6,7 @@ Technical specification for ZeroVeil's request mixing system.
 
 **Goal:** Break the correlation between tenant identity and request content at the provider level.
 
-**Status:** `PLANNED_COMMUNITY` design document. Mixer primitives are not implemented in current v0/v1 Community releases.
+**Status:** research design; not implemented, not scheduled.
 
 ---
 
@@ -50,7 +50,7 @@ class MixerConfig:
 | min_batch=3, max_wait=500ms | Up to 500ms | Basic |
 | min_batch=10, max_wait=2000ms | Up to 2s | Good |
 
-**Planned default (Community):** min_batch=3, max_wait=500ms (balance latency vs. privacy)
+**Example default (research design):** min_batch=3, max_wait=500ms (balance latency vs. privacy)
 
 ### 2. Request Normalization
 
@@ -161,7 +161,7 @@ PROVIDER_API_KEY = os.getenv("ZEROVEIL_PROVIDER_KEY")  # One key for all tenants
 
 ## Network Effect
 
-Planned mixing effectiveness scales with tenant count:
+Hypothetical mixing effectiveness would scale with tenant count:
 
 ```
 Mixing Pool Size → Correlation Resistance
@@ -213,12 +213,12 @@ ZEROVEIL_MIXER_ENABLED=false
 
 | Component | Status | Week |
 |-----------|--------|------|
-| Request normalization | Planned | 5 |
-| Batching queue | Planned | 5 |
-| Shuffle dispatch | Planned | 5 |
-| Jitter timing | Planned | 5 |
-| Response routing | Planned | 5 |
-| Config/policy integration | Planned | 5 |
+| Request normalization | Not started | — |
+| Batching queue | Not started | — |
+| Shuffle dispatch | Not started | — |
+| Jitter timing | Not started | — |
+| Response routing | Not started | — |
+| Config/policy integration | Not started | — |
 
 ---
 

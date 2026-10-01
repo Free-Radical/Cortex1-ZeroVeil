@@ -87,14 +87,14 @@ ZeroVeil specifically addresses AI-related risks per the NIST AI Risk Management
 |-----------------|-------------------|
 | **GOVERN** | Privacy policy enforcement, tenant governance |
 | **MAP** | Threat model documentation, risk identification |
-| **MEASURE** | Audit logging, correlation resistance metrics |
+| **MEASURE** | Audit logging, policy-decision metrics |
 | **MANAGE** | ZDR enforcement, provider vetting, abuse controls |
 
 ### AI-Specific Risk Mitigations
 
 | Risk Category | Mitigation |
 |---------------|-----------|
-| Privacy | Mixer architecture reduces provider-side correlation |
+| Privacy | PII rejection gate; ZDR requested from the provider; metadata-only audit |
 | Security | No content logging, encrypted transport |
 | Accountability | Audit trails, tenant isolation |
 | Transparency | Source-available Community gateway, published policies |

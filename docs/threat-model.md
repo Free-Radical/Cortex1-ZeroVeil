@@ -81,7 +81,7 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 |---|---|---|
 | Upstream sees raw PII | Gateway PII scanning blocks obvious patterns; client-side scrub recommended | Regex-only; won't catch names, addresses, context |
 | Obvious PII patterns leak | PII gate rejects SSN/CC/email/phone/IP (ALWAYS ON) | Regex-only; determined insider can rephrase |
-| Upstream correlates by API key | ZDR-only intent gate now; shared-identity/mixing is future work | Timing/volume correlation remains possible |
+| Upstream correlates by API key | Not mitigated. ZDR is requested; the provider still sees the operator's API key | Timing/volume correlation remains possible |
 | Gateway logs leak content | `metadata_only` mode + audit schema lacks content fields | Misconfiguration or code changes can add logging |
 | Brute-force API keys | Rate limiting + compare hashed keys (`sha256`) | Weak keys still guessable over time |
 | Oversized payload DoS | Policy limits on message count/size | Distributed DoS still possible |
@@ -89,7 +89,7 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 
 ## Threats NOT Addressed (Non-Goals)
 
-- Traffic analysis / timing attacks (requires mixer, Week 5)
+- Traffic analysis / timing attacks (not addressed; no mixer is built or scheduled)
 - Malicious gateway operator (self-host or trust)
 - Client-side malware (out of scope)
 - Upstream provider collusion (trust boundary)

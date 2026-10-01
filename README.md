@@ -80,7 +80,7 @@ python scripts/demo_gateway.py
 
 ## What Is This?
 
-Cortex1-ZeroVeil is an **OpenAI-compatible proxy** that adds DLP controls to any LLM endpoint—with one line of code.
+Cortex1-ZeroVeil is an **OpenAI-compatible proxy** that adds DLP controls to LLM calls routed through OpenRouter—with one line of code.
 
 ```python
 # Add DLP to your app
@@ -93,7 +93,7 @@ client = OpenAI(base_url="https://your-zeroveil/v1")
 
 2. **DLP gateway controls, enforced today.** Policy enforcement, PII rejection, and metadata-only audit logging are implemented now.
 
-3. **Works with any OpenAI-compatible endpoint.** Direct providers (OpenAI, Anthropic), aggregators (OpenRouter, Together AI), or self-hosted models (vLLM, Ollama).
+3. **Routes through OpenRouter today.** OpenRouter is the only upstream provider the gateway supports in v0.2.0.
 
 ---
 
@@ -134,7 +134,7 @@ response = client.chat.completions.create(
 - Audit logging for compliance (metadata-only, no content)
 - Model allowlists (restrict to approved models)
 - Rate/cost limits per tenant
-- Works with OpenRouter, OpenAI, Anthropic, or any OpenAI-compatible endpoint
+- Routes through OpenRouter (the only provider supported today)
 
 ### Enterprise IT / Security Teams
 
@@ -216,7 +216,7 @@ For proactive redaction, use the ZeroVeil SDK (local-only, source-available unde
 | Bastio, Portkey | Cloud scrubbing | We reject, not scrub—your PII never reaches us |
 | LiteLLM + Presidio | DIY toolkit | We provide compliance-ready audit + gateway out of box |
 | Kong Enterprise | Enterprise pricing | Developer-friendly, source-available core (PolyForm Noncommercial 1.0.0) |
-| Bedrock/Model Armor | Single provider | Provider-agnostic, works with any endpoint |
+| Bedrock/Model Armor | Single provider | Routes through OpenRouter today |
 | **All of them** | — | ZeroVeil does not claim correlation resistance or anonymity; see `docs/mixer-design.md` for research-only work in this area |
 
 ---
@@ -237,24 +237,7 @@ We designed this so you trust us with **less**, not more.
 
 ## Getting Started
 
-### For Developers
-
-```bash
-# Install
-pip install cortex1-zeroveil-community
-
-# Configure
-export ZEROVEIL_UPSTREAM_URL="https://api.openai.com/v1"
-export ZEROVEIL_API_KEY="your-openai-key"
-
-# Run
-python -m zeroveil_gateway
-
-# Use in your app
-client = OpenAI(base_url="http://localhost:8000/v1")
-```
-
-### For Enterprise IT
+### Install and run
 
 ```bash
 # Install
@@ -272,12 +255,11 @@ python scripts/demo_gateway.py
 
 See [docs/architecture.md](docs/architecture.md) for Corporate AI Gateway deployment topology.
 
-### Deployment Options
+### Deployment
 
-Both Community and Pro are available **self-hosted** or **cloud-hosted**:
+ZeroVeil v0.2.0 is self-hosted only. There is no ZeroVeil-operated hosted service.
 
-| Option | Relay Identity | Mixing Benefit | Best For |
-|--------|----------------|----------------|----------|
+--------|----------------|----------------|----------|
 | **Cloud-Hosted** | Shared (ZeroVeil-operated) | High (network effect) | Most users |
 | **Self-Hosted** | Your own API keys | None (unless multi-tenant) | Air-gap, data sovereignty |
 
@@ -314,7 +296,7 @@ Contact: Saqib.Khan@Me.com for access.
 | PII rejection gate | Done (enabled by default) |
 | Multi-tenant auth | Done |
 | Audit logging (metadata-only) | Done |
-| Provider routing | Stubbed (Week 3) |
+| Provider routing | Done (OpenRouter) |
 
 **Roadmap:** `IMPLEMENTED_NOW` DLP Gateway → `PLANNED_COMMUNITY` Multi-provider support → Public release
 
@@ -344,11 +326,7 @@ Open an issue or reach out: Saqib.Khan@Me.com
 
 ## License
 
-PolyForm Noncommercial License 1.0.0.
-
-- Personal, hobby, educational, research, evaluation, and other noncommercial use are allowed.
-- Commercial, hosted, customer-facing, internal business, paid, or other monetized use requires a separate written commercial license.
-- Contact: Saqib.Khan@Me.com
+Source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
 
 ## Prior Art
 
