@@ -33,7 +33,7 @@ logs/
 .DS_Store
 Thumbs.db
 
-# AI tool configurations (CRITICAL - never commit)
+# Local tool configuration and helper files (never commit)
 CLAUDE.md
 CLAUDE.*.md
 scripts/check_ai_attribution.py

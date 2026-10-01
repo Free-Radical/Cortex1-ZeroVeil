@@ -9,7 +9,7 @@ Current releases focus on **enterprise DLP controls**: an OpenAI-compatible gate
 **What is implemented today:**
 1. **Content privacy / DLP Gateway (`IMPLEMENTED_NOW`):** policy enforcement, PII rejection, ZDR-only intent, redaction attestation, metadata-only audit logging.
 
-Everything else in this document under "research" or `PLANNED_COMMUNITY` is design work: not built, not scheduled, and not a claim about what ZeroVeil does today.
+Everything else described as "research" is design work: not built, not scheduled, and not a claim about what ZeroVeil does today.
 
 **Two audiences, same product:**
 - **Developers** — Add DLP to regulated apps with one endpoint change
@@ -31,7 +31,7 @@ Everything else in this document under "research" or `PLANNED_COMMUNITY` is desi
 | Audit logging | Done |
 | Provider routing | Done (OpenRouter) |
 
-See `docs/spec-v0.md` for API contract and `docs/editions.md` for Community vs Pro boundary.
+See `docs/spec-v0.md` for API contract and `docs/editions.md` for editions.
 
 ---
 
@@ -118,56 +118,20 @@ ZeroVeil v0.2.0 is **self-hosted only**; there is no ZeroVeil-operated hosted se
 - **Community** — Source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial 1.0.0 (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
   - `IMPLEMENTED_NOW`: Policy enforcement, PII rejection gate, metadata-only audit events, conformance tests
   - Request aggregation is research only (`docs/mixer-design.md`); not implemented, not scheduled.
-- **Pro (paid):**
-  - `PRO_ONLY`: Enterprise auth (SSO/SAML), compliance evidence bundles, signed audit logs, advanced routing/governance
+- **Pro:** a commercial license is available (contact Saqib.Khan@Me.com). Pro features are not part of v0.2.0.
 
 See `docs/editions.md` for the canonical split and `docs/mixer-design.md` for the research design.
 
 ### 2. ZDR Enforcement
 
-Strict Zero Data Retention policy enforcement:
+- The policy requires clients to send `zdr_only: true` (`enforce_zdr_only`).
+- Every OpenRouter request carries `zdr: true`, `data_collection: "deny"` and `allow_fallbacks: false`; a caller cannot weaken these.
+- OpenRouter is the only supported provider (`allowed_providers: ["openrouter"]`). ZeroVeil does not verify what OpenRouter or the upstream model providers actually retain.
+- Audit events record the provider and model, never content.
 
-- Provider allow-list based on contractual ZDR commitments
-- Runtime verification where provider APIs support it (currently limited; most verification is policy-based)
-- Audit logging of provider selection (without content)
-- Fallback behavior when ZDR cannot be verified
+### 3. Client SDKs
 
-**Supported Providers (must verify ZDR):**
-- Providers with contractual ZDR guarantees
-- Self-hosted endpoints
-- Custom deployments with verified retention policies
-
-**Provider Optimization:**
-We are implementing periodic reviews of supported LLM providers to optimize routing decisions based on:
-- Cost efficiency (cost per token/request)
-- Response latency and throughput
-- Task-specific performance (coding, analysis, creative, etc.)
-- ZDR policy compliance status
-- Reliability and uptime history
-
-Tier escalation and automated cost policy are **Pro** responsibilities. The Community gateway stays conservative and auditable; it provides policy enforcement and provider adapter primitives.
-
-Request aggregation (`docs/mixer-design.md`) is research only and is not implemented.
-
-### 3. Client SDK
-
-A client SDK for local PII scrubbing and gateway access is outside this repository and is not part of v0.2.0.
-
-Commercially licensed Pro features are available under a separate written license; contact Saqib.Khan@Me.com.
-
-#### Client-Side Responsibilities
-
-**Device-Aware Routing:**
-| Mode | Hardware | Strategy |
-|------|----------|----------|
-| LOCAL_PREFERRED | GPU (8GB+ VRAM) | Local models preferred, gateway fallback |
-| HYBRID | CPU (16GB+ RAM) | Local preprocessing, gateway for complex tasks |
-| CLOUD_ONLY | Minimal | Gateway with mandatory local PII scrubbing |
-
-**Pro routing policy:**
-- Tier escalation and cost-optimized routing (if used) are Pro features and should not be required to adopt the Community gateway.
-
-*Note: Device detection and local-first routing occur client-side. The gateway handles policy enforcement and provider routing for cloud-bound requests only.*
+Client SDKs are not part of v0.2.0.
 
 ---
 
@@ -236,7 +200,7 @@ Commercially licensed Pro features are available under a separate written licens
 
 **Approach:**
 - **Rate limiting:** Token-based limits per tenant
-- **Content policy:** Provider-side content policies apply; the gateway's always-on PII scan inspects every request before it is forwarded, and the gateway does not otherwise moderate content
+- **Content policy:** Provider-side content policies apply; the gateway's PII gate (on by default) inspects every request before it is forwarded, and the gateway does not otherwise moderate content
 - **Operator policy:** The operator of a deployment decides acceptable use and can revoke tenant keys
 
 **What we will NOT do:**
@@ -250,7 +214,7 @@ Commercially licensed Pro features are available under a separate written licens
 
 ## Deployment Models
 
-Both Community and Pro editions are self-hosted.
+ZeroVeil is self-hosted.
 
 ### Self-Hosted
 
@@ -274,14 +238,14 @@ ZeroVeil can operate as an enterprise DLP proxy that intercepts and controls all
 │  │ Workstation │     │  ┌─────────────────────────────────────┐    │   │
 │  │             │     │  │ Ingress Layer                       │    │   │
 │  │ OPENAI_API_ │────►│  │ - OpenAI-compatible endpoint        │    │   │
-│  │ BASE=proxy  │     │  │ - Anthropic-compatible endpoint     │    │   │
+│  │ BASE=proxy  │     │  │                                     │    │   │
 │  └─────────────┘     │  └──────────────┬──────────────────────┘    │   │
 │                      │                 │                           │   │
 │  ┌─────────────┐     │  ┌──────────────▼──────────────────────┐    │   │
 │  │ CI/CD       │     │  │ Policy & Inspection Layer           │    │   │
 │  │ Pipeline    │────►│  │ - PII/PHI rejection gate            │    │   │
 │  └─────────────┘     │  │ - Model allowlist enforcement       │    │   │
-│                      │  │ - Cost/rate limiting                │    │   │
+│                      │  │ - Rate limiting                     │    │   │
 │                      │  └──────────────┬──────────────────────┘    │   │
 │                      │                 │                           │   │
 │                      │  ┌──────────────▼──────────────────────┐    │   │
@@ -294,19 +258,19 @@ ZeroVeil can operate as an enterprise DLP proxy that intercepts and controls all
 │                      └─────────────────┼───────────────────────────┘   │
 │                                        │                               │
 │  Firewall: BLOCK direct access to      │                               │
-│  api.openai.com, api.anthropic.com     │                               │
+│  direct provider APIs                  │                               │
 └────────────────────────────────────────┼───────────────────────────────┘
                                          │
                                          ▼
                               ┌─────────────────────┐
-                              │ LLM Providers       │
-                              │ (direct)            │
+                              │ OpenRouter          │
+                              │                     │
                               └─────────────────────┘
 ```
 
-**Egress routing:** requests go directly to LLM providers with DLP controls applied.
+**Egress routing:** requests go to OpenRouter, the only supported provider, after the DLP controls pass.
 
-**Key difference from the attestation mode:** In Corporate Gateway mode, clients don't need to send attestation headers (`require_scrubbed_attestation` is disabled for simpler integration). **PII scanning is ALWAYS ON in both modes** — the gateway never relies on client attestation for security. This enables drop-in deployment where applications only need to change `OPENAI_API_BASE`.
+**Attestation option:** a corporate deployment can set `require_scrubbed_attestation` to `false` so clients don't need to send `metadata.scrubbed`. The PII gate is on by default either way and never relies on the attestation. This enables drop-in deployment where applications only need to change `OPENAI_API_BASE`.
 
 **Integration options:**
 
@@ -322,30 +286,9 @@ ZeroVeil can operate as an enterprise DLP proxy that intercepts and controls all
 
 ---
 
-## Compliance & Security Standards
+## Compliance
 
-ZeroVeil Pro is architected to support major security frameworks:
-
-| Framework | ZeroVeil Alignment |
-|-----------|-------------------|
-| HITRUST CSF | PHI scrubbed client-side, audit logging |
-| SOC 2 Type II | Access controls, audit trails, availability |
-| ISO 27001/27701 | Information security + privacy management |
-| NIST CSF | US enterprise security baseline |
-| NIST AI RMF | AI-specific privacy and risk controls |
-| HIPAA | PHI never reaches the gateway when scrubbed client-side |
-| GDPR | Data minimization, DPA templates |
-
-See [docs/compliance.md](compliance.md) for detailed control mappings across all frameworks.
-
-**Regulatory notes:**
-- **HIPAA**: PHI must be scrubbed before reaching the gateway; consult qualified legal counsel for BAA requirements
-- **GDPR**: Data minimization by design; processor agreements available
-- **CCPA**: User rights and disclosure procedures documented
-
-Note: By requiring local PII scrubbing, compliance burden is simplified — we are not a processor of personal data.
-
----
+ZeroVeil holds no certifications. See [docs/compliance.md](compliance.md) for what the gateway does and what the operator must provide (TLS, encryption at rest, incident response, log integrity).
 
 ---
 
@@ -355,11 +298,10 @@ Note: By requiring local PII scrubbing, compliance burden is simplified — we a
 - Formal verification of privacy properties (long-term goal, as resources permit)
 - Independent security audits
 - PII/PHI leak detection to identify insufficient or failed data scrubbing before it reaches the gateway
-- SDK enhancements: additional redaction backends, language support expansion
 
 ---
 
-*Document Version: 1.3*
-*Date: December 2025*
+*Document Version: 1.4*
+*Date: 2026-10-01*
 *Author: Saqib Ali Khan*
 *Part of the Cortex1 family*

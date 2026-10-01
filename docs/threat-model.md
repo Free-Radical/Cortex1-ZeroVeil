@@ -5,11 +5,10 @@
 **Security is OPT-OUT, not opt-in. Most restrictive by default.**
 
 ZeroVeil defaults to the most restrictive, privacy-preserving configuration:
-- **PII scanning**: ALWAYS ON - gateway scans every request, no bypass, no exceptions
-- **PII gate**: ENABLED by default - rejects requests containing obvious PII patterns
+- **PII gate**: ENABLED by default - scans every request and rejects obvious PII patterns (`pii_gate.enabled: false` turns it off; not recommended)
 - **ZDR-only**: ENABLED by default - requires zero data retention intent
 - **Metadata-only logging**: ENFORCED - content is never logged
-- **Attestation**: Evidence only - client attestation is logged but NEVER bypasses scanning
+- **Attestation**: Evidence only - client attestation is logged and never skips the PII gate
 
 **Critical principle:** Client attestation ("I scrubbed this") is logged for audit evidence but does NOT reduce or bypass PII scanning. Attestation ≠ protection. Any bug, misconfiguration, or malicious client can still send PII — the gateway catches it regardless of what the client claims.
 
@@ -80,7 +79,7 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 | Threat | Mitigation | Residual Risk |
 |---|---|---|
 | Upstream sees raw PII | Gateway PII scanning blocks obvious patterns; client-side scrub recommended | Regex-only; won't catch names, addresses, context |
-| Obvious PII patterns leak | PII gate rejects SSN/CC/email/phone/IP (ALWAYS ON) | Regex-only; determined insider can rephrase |
+| Obvious PII patterns leak | PII gate rejects SSN/CC/email/phone/IP (on by default) | Regex-only; determined insider can rephrase |
 | Upstream correlates by API key | Not mitigated. ZDR is requested; the provider still sees the operator's API key | Timing/volume correlation remains possible |
 | Gateway logs leak content | `metadata_only` mode + audit schema lacks content fields | Misconfiguration or code changes can add logging |
 | Brute-force API keys | Rate limiting + compare hashed keys (`sha256`) | Weak keys still guessable over time |
@@ -107,7 +106,7 @@ When deployed as a corporate AI gateway (enterprise DLP proxy), additional threa
 | Accidental PII leakage to AI providers | PII rejection gate blocks before sending |
 | Unauthorized AI model usage | Model allowlist enforcement |
 | Shadow AI (employees using unapproved channels) | Firewall blocks direct provider access |
-| Cost overruns | Per-tenant rate limits and daily budgets |
+| Cost overruns | Per-tenant rate limits and daily token limits |
 | Compliance gaps | Metadata-only audit logging for all interactions |
 
 ### What Corporate Gateway Mode Does NOT Protect Against

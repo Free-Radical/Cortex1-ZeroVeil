@@ -1,84 +1,46 @@
-# ZeroVeil Product Editions
+# ZeroVeil Editions
 
-> This file is the canonical edition summary. Pro features are available under a separate commercial license; contact Saqib.Khan@Me.com.
+This repository is the **Community Gateway**: the source-available enforcement core, self-hosted. It is the only thing available in v0.2.0.
 
-This repository is the **Community Gateway**: the source-available, noncommercial enforcement core.
-
-## Overview
-
-> **The SDKs are not part of this repository or of v0.2.0 and are not publicly available.** Only the Community Gateway is available. The SDK columns below describe a product split, not available software.
-
-ZeroVeil's product lines:
-- **SDKs** (client-side libraries, not available) — would scrub PII locally before requests leave the client
-- **Gateways** (server-side proxies) — enforce policy and audit
+Client SDKs are not part of v0.2.0.
 
 Source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial 1.0.0 (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
 
-Commercial, hosted, managed-service, customer-facing, internal business,
+Beyond the 32-day PolyForm Free Trial 1.0.0 evaluation (LICENSE-FREE-TRIAL),
+commercial, hosted, managed-service, customer-facing, internal business,
 revenue-generating, paid, or other monetized use requires a separate written
 commercial license.
 
 ---
 
-## Product Matrix
+## What v0.2.0 includes
 
-| | SDK | SDK Pro | Gateway Community | Gateway Pro |
-|---|---|---|---|---|
-| **License** | PolyForm NC + Free Trial (32 days) | PolyForm NC + Free Trial (32 days) + paid license | PolyForm NC + Free Trial (32 days) | PolyForm NC + Free Trial (32 days) + paid license |
-| **Runs where** | Client machine | Client machine | Self-hosted | Self-hosted |
-| **Cost** | Source-available, no fee | Paid license | Source-available, no fee | Paid license |
-| | | | | |
-| **PII scrubbing (local)** | Presidio backend only | Presidio + regex + scrubadub | — | — |
-| **Scrubbing modes** | Non-deterministic only (redacts) | Deterministic + non-deterministic (can reverse tokens after response) | — | — |
-| **Reversible token mapping** | no | yes | — | — |
-| **Scrub audit logging** | no | yes | — | — |
-| **Relay client** | Basic client to talk to gateway | Full client with auth, retry, streaming | — | — |
-| | | | | |
-| **PII rejection gate** | — | — | yes (safety net) | yes |
-| **Policy / allowlists / budgets** | — | — | yes | yes |
-| **Audit logging** | — | — | basic | signed + immutable |
-| **Multi-tenant auth** | — | — | yes | yes |
-| **Tier escalation** | — | — | no | yes |
-| **SSO / SIEM / dashboard** | — | — | no | yes |
-| **Bring your own keys** | — | — | yes | yes |
+| | Community Gateway |
+|---|---|
+| **License** | PolyForm NC + Free Trial (32 days); commercial use needs a written license |
+| **Runs where** | Self-hosted |
+| **PII rejection gate** | yes (regex tripwire, on by default) |
+| **Model allow-list, message limits** | yes |
+| **Per-tenant API keys and rate limits** | yes |
+| **Audit logging** | metadata-only JSONL |
+| **Provider** | OpenRouter only (ZDR requested) |
+| **Bring your own keys** | yes (your OpenRouter key) |
 
----
+## Pro
 
-## Who Uses What
-
-| User | SDK | SDK Pro | GW Community | GW Pro |
-|---|---|---|---|---|
-| Solo dev, wants basic PII safety | yes | — | — | — |
-| Startup proving PII handling to investors | yes | — | yes | — |
-| Dev team wanting shared LLM proxy with rate limits | — | — | yes | — |
-| Consultancy needing reversible scrubbing | — | yes | yes | — |
-| Healthcare company, PHI audit trail required | — | yes | — | yes |
-| Enterprise IT, 500 engineers, SSO + SIEM | — | — | — | yes |
-| Fintech, regulatory pressure, limited budget | yes | — | yes | — |
-| Large bank, full compliance | — | yes | — | yes |
-
----
-
-## Trust Funnel
-
-1. **SDK** (not available) — Would run locally. Zero trust required.
-2. **Gateway Community** — Self-hosted, read the source, verify no content logging. Minimal trust.
-3. **Gateway Pro** — Self-hosted, signed audit logs prove behavior. Moderate trust.
+A commercial license is available; contact Saqib.Khan@Me.com. Pro features are not part of v0.2.0 and are not described here as available.
 
 ---
 
 ## Chat UI: Open WebUI
 
-For interactive chat (replacing ChatGPT/Claude web), the recommended frontend is **Open WebUI** (MIT license, 126k+ GitHub stars).
-
-Open WebUI speaks OpenAI-compatible API natively. Point its `OPENAI_API_BASE` at the gateway and it works — no custom integration code. All gateway features (PII rejection, model allowlists, rate limits, audit) apply transparently.
+For interactive chat, a common frontend is **Open WebUI** (MIT license). It speaks the OpenAI-compatible API, so point its `OPENAI_API_BASE` at the gateway. Gateway features (PII rejection, model allow-list, rate limits, audit) apply to its requests.
 
 ### Deployment Stacks
 
 | Stack | What you get | Use case |
 |---|---|---|
-| Gateway + Open WebUI | Chat UI + DLP gateway, cloud models via OpenRouter | Power user or corporate ChatGPT replacement |
-| Gateway + Open WebUI + Ollama | Chat UI + DLP gateway + local models, no cloud keys needed | Air-gapped or fully local deployment |
+| Gateway + Open WebUI | Chat UI + DLP gateway, models via OpenRouter | Power user or team chat frontend |
 | Gateway only (no UI) | OpenAI-compatible API proxy | Developers integrating via `OPENAI_API_BASE` |
 
 ### Corporate Chatbot Replacement
@@ -86,5 +48,4 @@ Open WebUI speaks OpenAI-compatible API natively. Point its `OPENAI_API_BASE` at
 Instead of intercepting ChatGPT/Claude traffic (requires TLS interception, breaks with certificate pinning):
 1. Block `chat.openai.com`, `claude.ai`, `gemini.google.com` at the firewall
 2. Deploy Open WebUI + ZeroVeil Gateway
-3. Employees use the replacement — works in any browser, including iPhone (PWA)
-
+3. Employees use the replacement in any browser

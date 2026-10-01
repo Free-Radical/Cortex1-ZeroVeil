@@ -1,143 +1,40 @@
 # Compliance & Security Controls
 
-ZeroVeil Pro is architected to support enterprise compliance programs across major security frameworks.
+ZeroVeil is a self-hosted gateway. It holds no certifications (SOC 2, ISO 27001, HITRUST, FedRAMP or otherwise) and is not itself a compliance program. It supplies a few technical controls that can feed an operator's own program; everything else is the operator's responsibility.
 
 ---
 
-## Supported Frameworks
+## What the gateway does
 
-| Framework | Focus Area | ZeroVeil Relevance |
-|-----------|------------|-------------------|
-| **HITRUST CSF** | Healthcare security | PHI never reaches the gateway (client scrubs) |
-| **SOC 2 Type II** | Service organization controls | Audit logging, access controls, availability |
-| **ISO 27001/27002** | Information security management | Comprehensive security controls |
-| **ISO 27701** | Privacy management | Privacy-by-design architecture |
-| **NIST CSF** | Cybersecurity framework | US enterprise baseline |
-| **NIST AI RMF** | AI risk management | AI-specific privacy and security controls |
-| **HIPAA** | Healthcare privacy | Supports BAA requirements (PHI scrubbed client-side) |
-| **GDPR** | EU data protection | Data minimization, DPA support |
-| **FedRAMP** | Federal cloud security | Not certified |
+| Area | Behavior in v0.2.0 |
+|------|--------------------|
+| API authentication | Per-tenant API keys stored as SHA-256 hashes in `tenants/*.json`, compared in constant time; legacy single-key mode via `ZEROVEIL_API_KEY` |
+| Rate limits | Per-tenant requests per minute and tokens per day (in memory, reset on restart) |
+| PII gate | Regex rejection of SSN, credit card, email, phone and IPv4 patterns; on by default; not a comprehensive detector |
+| Zero data retention | Requests must set `zdr_only: true`; the OpenRouter call asks for `zdr: true`, `data_collection: "deny"`, `allow_fallbacks: false`. This is a request to the provider, not proof of its behavior |
+| Redaction attestation | Client must declare `metadata.scrubbed: true`; a declared flag, not a cryptographic proof |
+| Audit log | JSONL (or stdout) with metadata only: no prompt or response text. Rotated by size, pruned by age (`logging.retention`) |
+| Transport | Plain HTTP. The gateway does not terminate TLS |
+| Storage | Writes only the audit log file. No database |
 
----
+## What the operator is responsible for
 
-## Controls Implementation
+- **TLS** in transit (terminate it at a reverse proxy or load balancer in front of the gateway).
+- **Encryption at rest** for the host disk and the audit log.
+- **Audit log integrity, retention and shipping** (the log is an ordinary file; it is not signed or immutable), and any SIEM integration.
+- **Incident detection and response**, breach notification and post-incident review.
+- **Access reviews**, key rotation and secret management for tenant keys and the OpenRouter key.
+- **Deployment, change management and rollback** of the gateway itself.
+- **Reviewing OpenRouter and the upstream model providers** for data handling; ZeroVeil does not verify provider retention.
+- **Client-side redaction** before data reaches the gateway.
 
-How ZeroVeil addresses common control requirements across frameworks:
+## How this can help a customer's own program
 
-### Access Control
+| Customer need | What the gateway contributes |
+|---------------|------------------------------|
+| Keep obvious PII out of provider requests | Regex PII rejection; clients redact locally |
+| An audit trail of AI usage | Metadata-only decision log without content |
+| Ask providers not to retain data | ZDR requested on every OpenRouter call; fallbacks disabled |
+| Limit which models are used | `allowed_models` allow-list |
 
-| Requirement | ZeroVeil Implementation |
-|-------------|------------------------|
-| Role-based access | Pro: SSO/SAML/OIDC + fine-grained RBAC |
-| API authentication | SHA-256 hashed API keys, per-tenant isolation |
-| Least privilege | Tenant-scoped permissions, policy-based restrictions |
-| Access reviews | Audit logs exportable for periodic review |
-
-### Audit & Logging
-
-| Requirement | ZeroVeil Implementation |
-|-------------|------------------------|
-| Activity logging | Metadata-only audit events (no content logging) |
-| Log integrity | Pro: Signed/immutable audit logs |
-| Log retention | Configurable retention, compliance exports |
-| SIEM integration | Pro: Splunk, Datadog, custom webhook support |
-
-### Data Protection
-
-| Requirement | ZeroVeil Implementation |
-|-------------|------------------------|
-| Encryption in transit | TLS 1.3 on all endpoints |
-| Encryption at rest | Encrypted database storage |
-| Data minimization | No prompt/response content stored |
-| PII handling | Client-side scrubbing (never touches the gateway) |
-
-### Incident Response
-
-| Requirement | ZeroVeil Implementation |
-|-------------|------------------------|
-| Incident detection | Anomaly monitoring, rate limit alerts |
-| Response procedures | Documented runbooks, contact procedures |
-| Breach notification | Commitment to timely disclosure |
-| Post-incident review | Published post-mortems for significant events |
-
-### Vendor Management
-
-| Requirement | ZeroVeil Implementation |
-|-------------|------------------------|
-| Third-party assessment | LLM providers vetted for ZDR policies |
-| Provider allow-list | Only ZDR-verified providers in routing |
-| Contractual controls | Provider agreements reviewed for data handling |
-
-### Change Management
-
-| Requirement | ZeroVeil Implementation |
-|-------------|------------------------|
-| Version control | Git-based, all changes tracked |
-| Code review | PR-based workflow, required reviews |
-| Testing | Automated CI/CD, conformance tests |
-| Rollback capability | Immutable deployments, instant rollback |
-
----
-
-## NIST AI RMF Alignment
-
-ZeroVeil specifically addresses AI-related risks per the NIST AI Risk Management Framework:
-
-| AI RMF Function | ZeroVeil Controls |
-|-----------------|-------------------|
-| **GOVERN** | Privacy policy enforcement, tenant governance |
-| **MAP** | Threat model documentation, risk identification |
-| **MEASURE** | Audit logging, policy-decision metrics |
-| **MANAGE** | ZDR enforcement, provider vetting, abuse controls |
-
-### AI-Specific Risk Mitigations
-
-| Risk Category | Mitigation |
-|---------------|-----------|
-| Privacy | PII rejection gate; ZDR requested from the provider; metadata-only audit |
-| Security | No content logging, encrypted transport |
-| Accountability | Audit trails, tenant isolation |
-| Transparency | Source-available Community gateway, published policies |
-
----
-
-## Compliance Evidence Bundles (Pro)
-
-ZeroVeil Pro provides pre-built documentation packages for customer audits:
-
-**Included artifacts:**
-- System architecture diagrams
-- Data flow documentation
-- Control matrices (SOC 2, ISO 27001, HITRUST)
-- Access control policies
-- Incident response procedures
-- Vendor assessment summaries
-- Audit log samples and schemas
-
-**Pre-built templates:**
-- HIPAA Business Associate Agreement (BAA)
-- GDPR Data Processing Agreement (DPA)
-- Security questionnaire responses (SIG, CAIQ)
-
----
-
-## Certifications
-
-ZeroVeil holds no formal certifications. It is designed to help customers meet their own compliance programs; it is not itself a certification.
-
----
-
-## Customer Compliance Support
-
-ZeroVeil helps customers meet their own compliance requirements:
-
-| Customer Need | How ZeroVeil Helps |
-|---------------|-------------------|
-| "We need to use AI but can't send PII to cloud providers" | Client-side scrubbing + the gateway's PII rejection keep PII in your environment |
-| "We need audit trails for AI usage" | Metadata-only logging tracks usage without content |
-| "We need to prove AI providers don't retain our data" | ZDR-only routing with provider verification |
-| "We need SOC 2 evidence for our AI tools" | Compliance evidence bundles for your auditors |
-
----
-
-*For compliance questions or custom requirements, contact: Saqib.Khan@Me.com*
+See `docs/threat-model.md` for limits and non-goals.

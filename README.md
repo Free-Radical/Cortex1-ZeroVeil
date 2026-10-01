@@ -103,7 +103,7 @@ You're building an app that calls LLM APIs and handles PHI, PII, or PCI data. Ho
 | Cloud scrubbing (Strac, Private AI) | You send them your PII first—defeats the purpose |
 | Provider guardrails (Bedrock, Model Armor) | Single-provider lock-in |
 
-**ZeroVeil fills this gap:** Developer-friendly, provider-agnostic, compliance-ready.
+**ZeroVeil fills this gap:** Developer-friendly and self-hosted, with a metadata-only audit trail.
 
 ```python
 from openai import OpenAI
@@ -116,7 +116,7 @@ client = OpenAI(base_url="https://your-zeroveil/v1")
 
 # Your code stays the same
 response = client.chat.completions.create(
-    model="gpt-4",
+    model="openai/gpt-4o-mini",
     messages=[{"role": "user", "content": user_input}]
 )
 ```
@@ -125,7 +125,7 @@ response = client.chat.completions.create(
 - PII/PHI/PCI rejection before data leaves your environment
 - Audit logging for compliance (metadata-only, no content)
 - Model allowlists (restrict to approved models)
-- Rate/cost limits per tenant
+- Per-tenant rate and daily-token limits
 - Routes through OpenRouter (the only provider supported today)
 
 ### Enterprise IT / Security Teams
@@ -153,10 +153,10 @@ Companies are responding with blanket bans:
 +-------------------------------------------------------------+
 | Corporate Network                                           |
 |                                                             |
-|  Employee  --> ZeroVeil Gateway --> OpenAI/Anthropic/etc   |
+|  Employee  --> ZeroVeil Gateway --> OpenRouter             |
 |  ChatGPT   -->  - PII rejection (blocks sensitive data)    |
 |  Apps      -->  - Model allowlists                         |
-|  CI/CD     -->  - Rate/cost limits                          |
+|  CI/CD     -->  - Rate limits                               |
 |                 - Audit logging                             |
 |                                                             |
 |  Firewall: BLOCK direct api.openai.com                     |
@@ -175,10 +175,8 @@ Companies are responding with blanket bans:
 **What you get:**
 - Drop-in proxy (apps just change `OPENAI_API_BASE`)
 - Block direct provider access at firewall
-- Per-department budgets and model restrictions
-- Compliance-ready audit trails
-
-**Pro roadmap: redaction webhook integration.** For enterprises with existing data-cleaning pipelines, ZeroVeil can optionally forward blocked requests to your redaction service. Your service cleans the data using your approved methods, then retries through ZeroVeil. ZeroVeil never touches your data—but integrates with your existing compliance infrastructure.
+- Model restrictions and per-tenant limits
+- Metadata-only audit trail
 
 ---
 
@@ -236,7 +234,7 @@ We designed this so you trust us with **less**, not more.
 python -m pip install -e .[dev]
 
 # Configure
-set ZEROVEIL_POLICY_PATH=policies/default.json
+export ZEROVEIL_POLICY_PATH=policies/default.json
 
 # Run gateway
 python -m zeroveil_gateway
@@ -255,20 +253,7 @@ ZeroVeil v0.2.0 is self-hosted only. There is no ZeroVeil-operated hosted servic
 
 ## ZeroVeil Pro
 
-Enterprise features on top of Community:
-
-- Enterprise auth (SSO/SAML/OIDC) and RBAC
-- Architecture aligned with HITRUST CSF, ISO 27001/27701, SOC 2, NIST CSF, NIST AI RMF
-- Compliance evidence bundles for customer audits
-- Signed/immutable audit logs
-- Admin dashboard UI (requests, blocks, costs by tenant)
-- SIEM webhook integration
-
-*ZeroVeil holds no formal certifications.*
-
-See [docs/compliance.md](docs/compliance.md) for detailed control mappings.
-
-Contact: Saqib.Khan@Me.com for access.
+A commercial license is available; contact Saqib.Khan@Me.com. Pro features are not part of v0.2.0.
 
 ---
 
@@ -284,7 +269,7 @@ Contact: Saqib.Khan@Me.com for access.
 | Audit logging (metadata-only) | Done |
 | Provider routing | Done (OpenRouter) |
 
-**Roadmap:** `IMPLEMENTED_NOW` DLP Gateway → `PLANNED_COMMUNITY` Multi-provider support → Public release
+OpenRouter is the only supported provider in v0.2.0.
 
 ---
 

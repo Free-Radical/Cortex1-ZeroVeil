@@ -13,7 +13,8 @@ Noncommercial use is allowed under the repository license, including use by
 nonprofit, educational, public research, public safety or health,
 environmental protection and government organizations (see LICENSE).
 
-Commercial, hosted, managed-service, customer-facing, internal business,
+Beyond the 32-day PolyForm Free Trial 1.0.0 evaluation (LICENSE-FREE-TRIAL),
+commercial, hosted, managed-service, customer-facing, internal business,
 revenue-generating, paid, or other monetized use requires a separate written
 commercial license from Saqib Ali Khan.
 

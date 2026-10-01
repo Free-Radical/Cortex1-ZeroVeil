@@ -29,7 +29,7 @@ WHAT IT CATCHES:
 - IP addresses: 192.168.1.1
 
 For production use cases requiring higher accuracy, consider:
-- Microsoft Presidio (Pro edition) - handles names, addresses, medical terms
+- Microsoft Presidio - handles names, addresses, medical terms
 - Custom NER models with context awareness
 """
 
