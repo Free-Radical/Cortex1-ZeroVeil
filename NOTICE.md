@@ -11,7 +11,10 @@ License: PolyForm Noncommercial License 1.0.0
 Commercial licensing contact: Saqib.Khan@Me.com
 
 Personal, hobby, educational, research, evaluation, and other noncommercial
-use are allowed under the repository license.
+use are allowed under the repository license. Use by nonprofit, educational,
+public research, public safety or health, environmental protection and
+government organizations is also allowed. Companies may evaluate for 32 days
+under PolyForm Free Trial 1.0.0 (LICENSE-FREE-TRIAL).
 
 Commercial, hosted, managed-service, customer-facing, internal business,
 revenue-generating, paid, or other monetized use requires a separate written

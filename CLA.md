@@ -30,7 +30,7 @@ If You institute patent litigation against any entity alleging that the Project 
 
 You agree that the Licensor may distribute the Project (including Your Contributions):
 
-1) under the Project’s current license terms (currently PolyForm Noncommercial License 1.0.0, as described in `LICENSE`),
+1) under the Project’s current license terms (currently PolyForm Noncommercial License 1.0.0, plus PolyForm Free Trial 1.0.0 (32-day commercial evaluation), as described in `LICENSE` and `LICENSE-FREE-TRIAL`),
 2) under any commercial license the Licensor offers for the Project (see `COMMERCIAL-LICENSE.md`), and
 3) under any later license terms the Licensor publishes for the Project.
 

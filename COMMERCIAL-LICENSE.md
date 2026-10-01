@@ -13,6 +13,7 @@ Examples include:
 - educational and academic use
 - noncommercial research and evaluation
 - experimentation without any anticipated commercial application
+- use by charitable organizations, educational institutions, public research, public safety or health organizations, environmental protection organizations and government institutions (see LICENSE, Noncommercial Organizations)
 
 ## Uses That Require A Commercial License
 
@@ -23,7 +24,7 @@ including for example:
 - hosted, managed-service, SaaS, API, relay, gateway, or multi-tenant use
 - internal business use by a company, consultancy, or startup in
   support of operations, revenue, clients, or fundraising
-- contractor or employee use on behalf of an organization
+- contractor or employee use on behalf of a for-profit organization
 - bundling this repository into a paid or revenue-generating product
 - client work, paid implementation, paid support, or paid integration
 - training, tuning, or evaluation performed as part of building or operating a
