@@ -12,7 +12,6 @@ jobs:
         with:
           python-version: "3.11"
       - name: Check Signed-off-by (DCO style)
-        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

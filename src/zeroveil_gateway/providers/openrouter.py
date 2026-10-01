@@ -20,7 +20,7 @@ OPENROUTER_CONFIG = ProviderConfig(
     default_model="meta-llama/llama-3.1-8b-instruct",
     timeout_seconds=30,
     extra_headers={
-        "HTTP-Referer": "https://zeroveil.dev",
+        "HTTP-Referer": "https://zeroveil.io",
         "X-Title": "ZeroVeil Gateway",
     },
 )
