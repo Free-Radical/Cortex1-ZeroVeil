@@ -55,7 +55,7 @@ PATTERNS: dict[PII_TYPE, re.Pattern[str]] = {
     "ip_address": re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b"),
 }
 
-# Default enabled patterns (all patterns - gate is disabled by default anyway)
+# Default enabled patterns (all patterns - gate is enabled by default)
 DEFAULT_ENABLED: frozenset[PII_TYPE] = frozenset({"ssn", "credit_card", "email", "phone", "ip_address"})
 
 

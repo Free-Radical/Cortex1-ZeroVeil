@@ -16,7 +16,7 @@ That's the whole pitch. It lowers your risk; it doesn't guarantee it. ZeroVeil d
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-python -m pip install -U pip && python -m pip install -e .[dev]
+python -m pip install -U pip && python -m pip install -e ".[dev]"
 
 # Inbound auth (the gateway's own key). tenants/default.json ships with a
 # placeholder that will not match any real token, so point ZEROVEIL_TENANTS_PATH
@@ -45,7 +45,7 @@ That refusal is the product.
 
 ## What's not here
 
-The request-aggregation design in `docs/mixer-design.md` is research. It isn't built and it isn't a feature. Paid features are available under a separate commercial license.
+The request-aggregation design in `docs/mixer-design.md` is research. It isn't built and it isn't a feature. A commercial license is available for commercial use of this gateway; there are no additional paid features in v0.2.0.
 
 ---
 
@@ -166,7 +166,7 @@ Companies are responding with blanket bans:
 **What happens when ZeroVeil detects sensitive data:**
 
 1. Request is **blocked immediately**—never reaches the LLM provider
-2. Employee sees actionable error: "Request blocked: PII detected (email, SSN). Remove sensitive data before retrying."
+2. Employee sees actionable error: "Request contains unscrubbed PII. Scrub before retry." (the response details name the detected types, e.g. email, ssn)
 3. IT/Security receives audit event (metadata only, no content logged)
 4. Employee rephrases without sensitive data, or escalates to approved channel
 
@@ -204,7 +204,7 @@ For proactive redaction, scrub locally with your own tooling (for example Presid
 | Competitor | Their Approach | ZeroVeil Difference |
 |------------|---------------|---------------------|
 | Bastio, Portkey | Cloud scrubbing | We reject, not scrub—your PII never reaches us |
-| LiteLLM + Presidio | DIY toolkit | We provide compliance-ready audit + gateway out of box |
+| LiteLLM + Presidio | DIY toolkit | We provide metadata-only audit log + gateway out of box |
 | Kong Enterprise | Enterprise pricing | Developer-friendly, source-available core (PolyForm Noncommercial 1.0.0) |
 | Bedrock/Model Armor | Single provider | Routes through OpenRouter today |
 | **All of them** | — | ZeroVeil does not provide anonymity or correlation resistance |
@@ -231,7 +231,7 @@ We designed this so you trust us with **less**, not more.
 
 ```bash
 # Install
-python -m pip install -e .[dev]
+python -m pip install -e ".[dev]"
 
 # Configure
 export ZEROVEIL_POLICY_PATH=policies/default.json

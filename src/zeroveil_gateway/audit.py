@@ -19,7 +19,7 @@ class AuditEvent:
     ts: int
     request_id: str
     tenant_id: str
-    action: Literal["allow", "deny"]
+    action: Literal["allow", "deny", "provider_error"]
     reason: str
     schema_version: str = "1"
     ts_iso: str = ""
