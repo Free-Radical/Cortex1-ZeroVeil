@@ -1,12 +1,10 @@
-# Mixer Design
+# Mixer Design (Research)
 
-> **Research design, not built.** This document describes a research direction only. It is not implemented in any current release and is not claimed as a product feature (no anonymity, unlinkability, or correlation-resistance guarantee is made).
+> **Research design, not built, not scheduled.** This document describes a research direction only. It is not implemented in any release, ZeroVeil v0.2.0 contains none of it, and it is not a product feature. ZeroVeil makes no anonymity, unlinkability, or correlation-resistance claim. Every statement below is hypothetical: it describes what such a design would do, not what ZeroVeil does.
 
-Technical specification for ZeroVeil's request mixing system.
+This note sketches how a request-aggregation ("mixer") layer could be structured if one were ever built.
 
-**Goal:** Break the correlation between tenant identity and request content at the provider level.
-
-**Status:** research design; not implemented, not scheduled.
+**Hypothetical goal:** Reduce how directly a provider could associate a request with the tenant that sent it. Whether any design achieves this would have to be demonstrated; none is claimed.
 
 ---
 
@@ -14,7 +12,7 @@ Technical specification for ZeroVeil's request mixing system.
 
 ```
 Tenant A ──┐
-Tenant B ──┼──→ [Auth + Validate] ──→ [Mixer Queue] ──→ [Shared API Key] ──→ Provider
+Tenant B ──┼──→ [Auth + Validate] ──→ [Aggregation Queue] ──→ [Shared API Key] ──→ Provider
 Tenant C ──┘         │                      │
                      │                      │
               Verify attestation     Batch + Shuffle
@@ -22,17 +20,15 @@ Tenant C ──┘         │                      │
               Strip tenant headers   Normalize requests
 ```
 
-**Target behavior:** Provider sees requests from "ZeroVeil" with no tenant-identifying information.
-
-**Target behavior:** Provider cannot easily determine which tenant sent which request.
+In such a design, the provider would see requests arriving under the shared credential, without tenant headers.
 
 ---
 
-## Mixer Primitives
+## Hypothetical Primitives
 
 ### 1. Request Batching
 
-Collect multiple requests before dispatching to reduce timing correlation.
+A mixer would collect several requests before dispatching them.
 
 ```python
 @dataclass
@@ -42,43 +38,35 @@ class MixerConfig:
     jitter_range_ms: tuple = (50, 200)  # Random delay per request
 ```
 
-**Trade-off:** Larger batches = better mixing, but higher latency.
+**Trade-off:** Larger batches would add latency.
 
-| Setting | Latency Impact | Mixing Quality |
-|---------|----------------|----------------|
-| min_batch=1, max_wait=0 | None | None (pass-through) |
-| min_batch=3, max_wait=500ms | Up to 500ms | Basic |
-| min_batch=10, max_wait=2000ms | Up to 2s | Good |
-
-**Example default (research design):** min_batch=3, max_wait=500ms (balance latency vs. privacy)
+| Setting | Latency Impact |
+|---------|----------------|
+| min_batch=1, max_wait=0 | None (pass-through) |
+| min_batch=3, max_wait=500ms | Up to 500ms |
+| min_batch=10, max_wait=2000ms | Up to 2s |
 
 ### 2. Request Normalization
 
-Strip all tenant-identifying metadata before forwarding.
+A mixer would strip tenant-identifying metadata before forwarding.
 
 ```python
 def normalize_request(req: dict, tenant: TenantConfig) -> dict:
-    """Remove fingerprinting vectors from request."""
+    """Remove tenant-identifying fields from the request."""
     return {
-        "messages": req["messages"],        # Already scrubbed by client
+        "messages": req["messages"],
         "model": req.get("model", "default"),
         "metadata": {
             "scrubbed": req.get("metadata", {}).get("scrubbed", False),
-            # DROP: tenant_id, client IP, timestamps, custom headers
-            # DROP: scrubber version (could fingerprint SDK version)
         },
     }
 ```
 
-**Stripped fields:**
-- `X-ZeroVeil-Tenant` header
-- Client IP address
-- Request timestamps (replaced with batch timestamp)
-- Custom metadata beyond scrub attestation
+Fields it would drop: the tenant header, client IP address, request timestamps (replaced with a batch timestamp), and custom metadata beyond the scrub attestation.
 
 ### 3. Shuffle Dispatch
 
-Randomize order within each batch.
+A mixer would randomize the order within each batch.
 
 ```python
 import random
@@ -90,110 +78,56 @@ async def dispatch_batch(batch: list[NormalizedRequest]) -> list[Response]:
 
     responses = []
     for req in batch:
-        # Random delay between requests
-        jitter = random.uniform(0.05, 0.2)  # 50-200ms
-        await asyncio.sleep(jitter)
-
-        response = await send_to_provider(req)
-        responses.append(response)
+        await asyncio.sleep(random.uniform(0.05, 0.2))
+        responses.append(await send_to_provider(req))
 
     return responses
 ```
 
-**Effect:** Request #1 in queue might be sent 3rd. Timing analysis becomes unreliable.
-
 ### 4. One-Time Response Tokens
 
-Route responses back without persistent tenant↔request mapping.
+A mixer would need to route responses back without keeping a persistent tenant-to-request mapping.
 
 ```python
 import secrets
 
-# On request arrival
-correlation_token = secrets.token_hex(16)  # One-time, random
-pending_responses[correlation_token] = tenant_connection
-request.internal_token = correlation_token
+token = secrets.token_hex(16)  # One-time, random
+pending_responses[token] = tenant_connection
 
-# On provider response
-async def handle_response(response, internal_token):
-    tenant_conn = pending_responses.pop(internal_token)  # Remove immediately
+async def handle_response(response, token):
+    tenant_conn = pending_responses.pop(token)  # Remove immediately
     await tenant_conn.send(response)
-    # Token is now garbage - no persistent link
 ```
 
-**Key property:** After response delivery, no record exists of which tenant made which request.
+### 5. Shared Relay Credential
 
-### 5. Shared Relay Identity
-
-All requests use ZeroVeil's API credentials (cloud-hosted only).
-
-```python
-# Cloud-hosted: shared credentials
-PROVIDER_API_KEY = os.getenv("ZEROVEIL_PROVIDER_KEY")  # One key for all tenants
-
-# Self-hosted: tenant provides their own
-# (No mixing benefit, but still get policy enforcement)
-```
+In such a design, all requests would use one provider credential held by the aggregating operator. A self-hosted gateway with a single tenant would gain nothing from this and would only keep policy enforcement and ZDR routing.
 
 ---
 
-## What This Defeats
+## Limits (even in a hypothetical build)
 
-| Attack Vector | Mitigated | Mechanism |
-|---------------|-----------|-----------|
-| Provider sees tenant ID | Yes | Header stripping, shared credentials |
-| Timing correlation | Yes | Batching + jitter + shuffle |
-| Request ordering analysis | Yes | Shuffle within batch |
-| Volume fingerprinting | Partial | Batching smooths bursts |
-| API key breach → user history | Yes | Shared key has no per-user history |
-
-## What This Does NOT Defeat
-
-| Attack Vector | Why Not | Mitigation |
-|---------------|---------|------------|
-| Stylometry (writing style) | Content-based | User must vary prompts |
-| Semantic fingerprinting | Unique topics leak identity | User responsibility |
-| Low-volume correlation | Few tenants = weak mixing | Cloud hosting (larger pool) |
-| Compromised ZeroVeil | Operator collusion | Self-host if untrusted |
-| Legal compulsion | Subpoena to operator | Jurisdiction choice, warrant canary |
+| Concern | Why a mixer would not address it |
+|---------|----------------------------------|
+| Stylometry (writing style) | Content-based |
+| Semantic fingerprinting | Unique topics can identify the sender |
+| Few tenants | A small pool would give little aggregation |
+| Compromised or colluding operator | The operator would see individual requests |
+| Legal compulsion | The operator could be compelled to disclose |
 
 ---
 
-## Network Effect
+## Hypothetical Configuration
 
-Hypothetical mixing effectiveness would scale with tenant count:
-
-```
-Mixing Pool Size → Correlation Resistance
-─────────────────────────────────────────
-     1 tenant   → 0%   (no mixing possible)
-     5 tenants  → ~80% (basic protection)
-    50 tenants  → ~98% (strong protection)
-   500 tenants  → ~99.8% (very strong)
-```
-
-**A cloud-hosted deployment would be recommended for small organizations if a mixer were ever built (research design; not implemented, not scheduled).**
-
-Self-hosting only provides policy enforcement and ZDR routing — no mixing benefit unless you have multiple internal tenants.
-
----
-
-## Configuration
-
-### Environment Variables
+Nothing below exists in the gateway. These names are illustrative only.
 
 ```bash
-# Mixer settings
 ZEROVEIL_MIXER_MIN_BATCH=3
 ZEROVEIL_MIXER_MAX_WAIT_MS=500
 ZEROVEIL_MIXER_JITTER_MIN_MS=50
 ZEROVEIL_MIXER_JITTER_MAX_MS=200
-
-# Disable mixing (pass-through mode)
 ZEROVEIL_MIXER_ENABLED=false
 ```
-
-### Policy Integration
 
 ```json
 {
@@ -211,46 +145,14 @@ ZEROVEIL_MIXER_ENABLED=false
 
 ## Implementation Status
 
-| Component | Status | Week |
-|-----------|--------|------|
-| Request normalization | Not started | — |
-| Batching queue | Not started | — |
-| Shuffle dispatch | Not started | — |
-| Jitter timing | Not started | — |
-| Response routing | Not started | — |
-| Config/policy integration | Not started | — |
+None of the components above is implemented or scheduled.
 
 ---
 
-## Security Considerations
+## Hypothetical Security Considerations
 
-### Logging
-
-Mixer MUST NOT log:
-- Request content (already policy)
-- Correlation tokens after response delivery
-- Tenant↔request mappings
-
-Mixer MAY log (metadata only):
-- Batch sizes
-- Aggregate latency stats
-- Error rates
-
-### Memory Safety
-
-- Correlation tokens cleared immediately after response
-- No persistent tenant↔request state
-- Batch queue has bounded size (prevents memory exhaustion)
-
-### Failure Modes
-
-| Failure | Behavior |
-|---------|----------|
-| Batch timeout | Dispatch partial batch |
-| Provider error | Return error to originating tenant only |
-| Memory pressure | Reject new requests (429) |
+A mixer would have to avoid logging request content, one-time tokens after response delivery, and tenant-to-request mappings. It could log metadata only (batch sizes, aggregate latency, error rates), clear tokens immediately after delivery, keep the batch queue bounded, dispatch a partial batch on timeout, return provider errors to the originating tenant only, and reject new requests (429) under memory pressure.
 
 ---
 
-*Document Version: 1.0*
-*Date: January 2026*
+*Research note. Last revised: October 2026.*

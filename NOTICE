@@ -12,12 +12,12 @@ PRIOR ART AND DEFENSIVE PUBLICATION
 This repository constitutes a public disclosure and prior art of the
 following techniques, architectures, and system designs:
 
-1. LLM PRIVACY RELAY (MIXER ARCHITECTURE) — Core Product
-   - Multi-tenant prompt aggregation for provider-side anonymity
-   - User-to-prompt correlation breaking at cloud provider level
-   - Shared relay identity obscuring individual request origins
-   - Privacy-preserving batching across tenants
-   - Analogous to Bitcoin mixing for transaction privacy
+1. REQUEST AGGREGATION (RESEARCH DESIGN — not implemented, not a product feature)
+   - Design concept: aggregating requests from multiple tenants at a gateway
+   - Design concept: forwarding aggregated requests with a shared relay credential
+   - Design concept: batching requests with randomized dispatch timing
+   - Documented as a research design only (docs/mixer-design.md); ZeroVeil
+     v0.2.0 does not implement it and makes no claim about its effect
 
 2. ZERO DATA RETENTION (ZDR) ENFORCEMENT
    - Mandatory ZDR policy verification for cloud providers
@@ -39,7 +39,6 @@ following techniques, architectures, and system designs:
    - PII/PHI scrubbing must occur locally, before data reaches any relay
    - Sending raw PII to third parties for scrubbing defeats privacy goals
    - Content privacy (scrubbing) is user responsibility
-   - Identity privacy (mixing/relay) is ZeroVeil responsibility
    - Clear separation of trust boundaries
 
 ================================================================================

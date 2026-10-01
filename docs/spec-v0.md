@@ -1,4 +1,4 @@
-# ZeroVeil Gateway -- Spec v0 (Week 1)
+# ZeroVeil Gateway -- Spec v0
 
 This document is the v0 **source of truth** for the ZeroVeil community gateway:
 

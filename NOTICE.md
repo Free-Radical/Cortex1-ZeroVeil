@@ -7,26 +7,15 @@ Required Notice: Commercial evaluation: PolyForm Free Trial License 1.0.0 (32 da
 Repository: Cortex1-ZeroVeil
 Copyright © 2025 Saqib Ali Khan
 
-License: PolyForm Noncommercial License 1.0.0
-Commercial licensing contact: Saqib.Khan@Me.com
+License: Source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial 1.0.0 (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
 
-Personal, hobby, educational, research, evaluation, and other noncommercial
-use are allowed under the repository license. Use by nonprofit, educational,
-public research, public safety or health, environmental protection and
-government organizations is also allowed. Companies may evaluate for 32 days
-under PolyForm Free Trial 1.0.0 (LICENSE-FREE-TRIAL).
+Noncommercial use is allowed under the repository license, including use by
+nonprofit, educational, public research, public safety or health,
+environmental protection and government organizations (see LICENSE).
 
 Commercial, hosted, managed-service, customer-facing, internal business,
 revenue-generating, paid, or other monetized use requires a separate written
 commercial license from Saqib Ali Khan.
-
-Transition note:
-- Versions published before 2026-03-12 were released under Business Source
-  License 1.1.
-- Commits published from 2026-03-12 forward are released under the current
-  repository license shown above.
-- Earlier BUSL grants remain in effect for the older versions that were
-  already published.
 
 Trademark note:
 - Trademarks, service marks, product names, and logos are not licensed except

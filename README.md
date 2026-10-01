@@ -2,7 +2,7 @@
 
 **An LLM gateway you run yourself. It won't forward a prompt unless the rules are met, and it keeps a record of every decision without keeping the words.**
 
-You put ZeroVeil between your app and a hosted model API (it speaks the OpenAI chat format). Every request has to clear three checks, and if any one fails, the request goes nowhere:
+You put ZeroVeil between your app and a model API (it speaks the OpenAI chat format). Every request has to clear three checks, and if any one fails, the request goes nowhere:
 
 - **Zero data retention, requested.** ZeroVeil asks the provider for zero data retention and refuses to fall back to a provider that won't honor it.
 - **Redaction, attested.** The client has to state that the prompt was redacted (`metadata.scrubbed: true`). ZeroVeil also runs its own sensitive-data check and blocks what it catches. The attestation is a declared flag, not a cryptographic proof.
@@ -10,7 +10,7 @@ You put ZeroVeil between your app and a hosted model API (it speaks the OpenAI c
 
 That's the whole pitch. It lowers your risk; it doesn't guarantee it. ZeroVeil doesn't make you anonymous to the provider, and it isn't a compliance certification.
 
-> License: source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
+> License: source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial 1.0.0 (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
 
 ## Try it (about 5 minutes)
 
@@ -45,7 +45,7 @@ That refusal is the product.
 
 ## What's not here
 
-The mixer/aggregation design in `docs/mixer-design.md` is research. It isn't built, and we don't claim it. Paid features live in a separate commercial edition.
+The request-aggregation design in `docs/mixer-design.md` is research. It isn't built and it isn't a feature. Paid features are available under a separate commercial license.
 
 ---
 
@@ -69,14 +69,6 @@ python scripts/demo_gateway.py
 - `ZEROVEIL_POLICY_PATH`: policy JSON path (default `policies/default.json`).
 - `ZEROVEIL_TENANTS_PATH`: tenant config JSON path (default `tenants/default.json`); when it loads, per-tenant API keys (sha256 hashes) are required instead of `ZEROVEIL_API_KEY`.
 - `ZEROVEIL_STUB_MODE`: set `1`/`true` for local stub mode (skips the outbound provider call).
-
-## Related ZeroVeil Repos
-
-- `zeroveil-sdk`: public/community client SDK.
-- `zeroveil-gateway-pro`: commercially licensed gateway repo.
-- `zeroveil-pro`: commercially licensed SDK/features repo.
-
----
 
 ## What Is This?
 
@@ -190,9 +182,9 @@ Companies are responding with blanket bans:
 
 ---
 
-## Research: Mixer / Aggregation Design
+## Research: Request Aggregation Design
 
-A design for reducing provider-side correlation risk through request aggregation is documented in `docs/mixer-design.md`. It is research only: not implemented, not shipped, and not claimed as a feature of any current release.
+A design for aggregating requests through a shared relay credential is documented in `docs/mixer-design.md`. It is research only: not implemented, not scheduled, and not a feature of any release.
 
 ## Why We Reject, Not Scrub
 
@@ -217,7 +209,7 @@ For proactive redaction, use the ZeroVeil SDK (local-only, source-available unde
 | LiteLLM + Presidio | DIY toolkit | We provide compliance-ready audit + gateway out of box |
 | Kong Enterprise | Enterprise pricing | Developer-friendly, source-available core (PolyForm Noncommercial 1.0.0) |
 | Bedrock/Model Armor | Single provider | Routes through OpenRouter today |
-| **All of them** | — | ZeroVeil does not claim correlation resistance or anonymity; see `docs/mixer-design.md` for research-only work in this area |
+| **All of them** | — | ZeroVeil does not provide anonymity or correlation resistance |
 
 ---
 
@@ -272,7 +264,7 @@ Enterprise features on top of Community:
 - Admin dashboard UI (requests, blocks, costs by tenant)
 - SIEM webhook integration
 
-*Formal certifications are on the roadmap pending scale.*
+*ZeroVeil holds no formal certifications.*
 
 See [docs/compliance.md](docs/compliance.md) for detailed control mappings.
 
@@ -282,7 +274,7 @@ Contact: Saqib.Khan@Me.com for access.
 
 ## Status
 
-**Status:** DLP gateway is implemented and enforced. Mixer/aggregation is research only (see `docs/mixer-design.md`); it is not built and not claimed as a feature.
+**Status:** DLP gateway is implemented and enforced. Request aggregation is research only (see `docs/mixer-design.md`); it is not built and not a feature.
 
 | Component | Status |
 |-----------|--------|
@@ -301,7 +293,6 @@ Contact: Saqib.Khan@Me.com for access.
 - Spec: `docs/spec-v0.md`
 - Policy schema: `policies/default.json`
 - Gateway: `src/zeroveil_gateway/app.py`
-- Whitepaper: `docs/whitepaper.md`
 
 ---
 
@@ -312,7 +303,7 @@ Looking for contributors interested in privacy-first AI infrastructure. If you c
 - Zero-trust architecture
 - Building the missing privacy layer for AI
 
-See `CONTRIBUTING.md` and `CLA.md`.
+See `CONTRIBUTING.md`. Contributions are accepted under the terms in `CLA.md`; signing off your commits (`git commit -s`, the DCO) is the only acceptance step, and there is no separate CLA signature.
 
 Open an issue or reach out: Saqib.Khan@Me.com
 
@@ -320,7 +311,7 @@ Open an issue or reach out: Saqib.Khan@Me.com
 
 ## License
 
-Source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
+Source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial 1.0.0 (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
 
 ## Prior Art
 

@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Cortex1-ZeroVeil is a **DLP-first LLM gateway**: it enforces policy (PII rejection, ZDR-only intent, redaction attestation) before a request ever reaches a provider, and keeps a metadata-only audit trail. A separate mixer/aggregation design exists purely as research (see `docs/mixer-design.md`); it is not implemented, not shipped, and not claimed as a feature of any current or near-term release.
+Cortex1-ZeroVeil is a **DLP-first LLM gateway**: it enforces policy (PII rejection, ZDR-only intent, redaction attestation) before a request ever reaches a provider, and keeps a metadata-only audit trail. A separate request-aggregation design exists purely as research (see `docs/mixer-design.md`); it is not implemented, not scheduled, and not a feature of any release.
 
 Current releases focus on **enterprise DLP controls**: an OpenAI-compatible gateway with PII rejection, model allowlists, rate limits, and audit logging.
 
@@ -21,7 +21,7 @@ Everything else in this document under "research" or `PLANNED_COMMUNITY` is desi
 
 ## Implementation Status
 
-**Status:** `IMPLEMENTED_NOW` DLP gateway controls are live and enforced. The mixer/aggregation design remains research only (`docs/mixer-design.md`), with no committed schedule.
+**Status:** `IMPLEMENTED_NOW` DLP gateway controls are live and enforced. The request-aggregation design remains research only (`docs/mixer-design.md`), with no committed schedule.
 
 | Component | Status |
 |-----------|--------|
@@ -48,41 +48,13 @@ Even with "zero data retention" promises, the provider knows:
 - Timing and frequency patterns
 - Content of each request (even if not stored long-term)
 
-**Result:** User<->prompt correlation is fully visible to the provider.
-
-Existing solutions address content privacy (PII scrubbing) but not **identity privacy** at the provider level.
+**Result:** The provider sees which API key sent each prompt. ZeroVeil does not change that; it limits what is sent (PII rejection) and what is requested of the provider (zero data retention).
 
 ---
 
-## Research Design: Mixer Architecture (not implemented, not a claimed feature)
+## Research Design: Request Aggregation (not implemented, not a feature)
 
-### Core Concept
-
-```
-User A --->                                ---> Response A
-User B --+--> [Aggregation Layer] ---> [Shared Identity] ---> Cloud --+--> Response B
-User C --->                                ---> Response C
-```
-
-**Analogy:** Mix networks (a concept from anonymous communication research) break the sender<->receiver link by pooling messages through intermediate nodes. This section documents that idea as a research direction for LLM traffic; ZeroVeil does not implement it and does not claim anonymity, unlinkability, or correlation resistance as a feature.
-
-### Privacy Properties
-
-| Research property (not implemented) | Mechanism under study |
-|----------|-----------|
-| Provider-side correlation reduction | Shared relay identity (design only) |
-| Reduced user<->prompt linkability | Request aggregation (design only) |
-| Timing obfuscation | Batching windows (design only) |
-| Reduced metadata exposure | Shared patterns across tenants (design only) |
-
-### Trust Model
-
-The relay operator (Cortex1-ZeroVeil) sees individual requests. Users must trust:
-1. Relay does not log prompt content
-2. Relay does not correlate users to prompts
-3. Relay enforces stated ZDR policies
-
-This is a **trust tradeoff**, not trustless privacy. Users who cannot accept this should self-host or use direct API access.
+A design for aggregating requests from several tenants behind a shared relay credential is described in `docs/mixer-design.md`. It is a research document only. ZeroVeil v0.2.0 does not implement it, it is not scheduled, and ZeroVeil makes no claim about what such a design would achieve.
 
 ---
 
@@ -111,12 +83,10 @@ This separation is intentional:
 
 ZeroVeil SDK provides source-available local scrubbing tooling:
 - **Local-only**: Runs entirely in your environment—your data never leaves
-- **Source-available (PolyForm Noncommercial 1.0.0)**: Auditable, reviewable, and testable
-- **Optional**: Not part of the relay service—use your own scrubbing if preferred
+- **Auditable**: reviewable and testable
+- **Optional**: Not part of the gateway—use your own scrubbing if preferred
 
-*Note: The `zeroveil-sdk` repository is source-available under PolyForm Noncommercial 1.0.0. Early access is invite-only during initial development.*
-
-We will never ask you to send raw PII to our servers.
+ZeroVeil never asks you to send raw PII to a service for scrubbing.
 
 For advanced requirements (reversible tokens, multiple backends, audit logging), see ZeroVeil Pro.
 
@@ -148,13 +118,13 @@ This repository is the **Community Gateway**: the auditable enforcement core.
 
 ZeroVeil v0.2.0 is **self-hosted only**; there is no ZeroVeil-operated hosted service:
 
-- **Community (no fee for noncommercial use; PolyForm Noncommercial 1.0.0 plus PolyForm Free Trial 1.0.0, a 32-day commercial evaluation):**
+- **Community** — Source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial 1.0.0 (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
   - `IMPLEMENTED_NOW`: Policy enforcement, PII rejection gate, metadata-only audit events, conformance tests
-  - Mixer/aggregation is research only (`docs/mixer-design.md`); not implemented, not scheduled.
+  - Request aggregation is research only (`docs/mixer-design.md`); not implemented, not scheduled.
 - **Pro (paid):**
   - `PRO_ONLY`: Enterprise auth (SSO/SAML), compliance evidence bundles, signed audit logs, advanced routing/governance
 
-See `docs/editions.md` for the canonical split and `docs/mixer-design.md` for mixer technical details.
+See `docs/editions.md` for the canonical split and `docs/mixer-design.md` for the research design.
 
 ### 2. ZDR Enforcement
 
@@ -172,47 +142,30 @@ Strict Zero Data Retention policy enforcement:
 
 **Provider Optimization:**
 We are implementing periodic reviews of supported LLM providers to optimize routing decisions based on:
-- Cost efficiency (price per token/request)
+- Cost efficiency (cost per token/request)
 - Response latency and throughput
 - Task-specific performance (coding, analysis, creative, etc.)
 - ZDR policy compliance status
 - Reliability and uptime history
 
-Tier escalation and automated pricing/cost policy are **Pro** responsibilities. The Community gateway stays conservative and auditable; it provides policy enforcement and provider adapter primitives.
+Tier escalation and automated cost policy are **Pro** responsibilities. The Community gateway stays conservative and auditable; it provides policy enforcement and provider adapter primitives.
 
-**Aggregation Benefits (research, not implemented):**
-If a future aggregation/mixer design ships, it may also carry an economic benefit:
-
-*Economic:*
-- Aggregated volume qualifies for better provider pricing tiers
-- Collective buying power enables enterprise rate negotiations
-- Shared infrastructure and compliance costs
-
-None of this is implemented today, and ZeroVeil does not claim correlation resistance, anonymity, or unlinkability as a current or near-term feature.
+Request aggregation (`docs/mixer-design.md`) is research only and is not implemented.
 
 ### 3. Client SDK
 
-ZeroVeil provides a source-available client SDK (PolyForm Noncommercial 1.0.0) for local PII scrubbing and relay access.
+A client SDK for local PII scrubbing and gateway access is outside this repository and is not part of v0.2.0.
 
-- SDK repo: private for now (invite-only)
-
-#### SDK Tiers
-
-| Tier | Distribution | Features |
-|------|--------------|----------|
-| **ZeroVeil SDK** (Free) | Private repo (invite-only) | Presidio-based PII scrubbing, relay client |
-| **ZeroVeil Pro** (Paid) | Private PyPI | Deterministic/non-deterministic modes, reversible token mapping, multiple backends (Presidio, regex, scrubadub), audit logging |
-
-Contact Saqib.Khan@Me.com for Pro tier access.
+Commercially licensed Pro features are available under a separate written license; contact Saqib.Khan@Me.com.
 
 #### Client-Side Responsibilities
 
 **Device-Aware Routing:**
 | Mode | Hardware | Strategy |
 |------|----------|----------|
-| LOCAL_PREFERRED | GPU (8GB+ VRAM) | Local models preferred, relay fallback |
-| HYBRID | CPU (16GB+ RAM) | Local preprocessing, relay for complex tasks |
-| CLOUD_ONLY | Minimal | Relay with mandatory local PII scrubbing |
+| LOCAL_PREFERRED | GPU (8GB+ VRAM) | Local models preferred, gateway fallback |
+| HYBRID | CPU (16GB+ RAM) | Local preprocessing, gateway for complex tasks |
+| CLOUD_ONLY | Minimal | Gateway with mandatory local PII scrubbing |
 
 **Pro routing policy:**
 - Tier escalation and cost-optimized routing (if used) are Pro features and should not be required to adopt the Community gateway.
@@ -223,23 +176,23 @@ Contact Saqib.Khan@Me.com for Pro tier access.
 
 ## Security Model
 
-**Guiding Principle:** ZeroVeil is a DLP/redaction-attestation gateway today. It does not provide anonymity, unlinkability, or correlation resistance; any future work in that direction is research only (`docs/mixer-design.md`).
+**Guiding Principle:** ZeroVeil is a DLP/redaction-attestation gateway. It does not provide anonymity, unlinkability, or correlation resistance.
 
 ### Threat Mitigation
 
 | Threat | Mitigation |
 |--------|------------|
 | PII exposure to providers | Gateway PII rejection gate + user redacts locally before sending |
-| Relay operator logging | Policy + audit (trust required) |
-| Provider-side user correlation | Not mitigated today; aggregation is a research idea only, not implemented |
-| Metadata fingerprinting | Not mitigated today; batching/timing normalization is a research idea only |
+| Gateway operator logging | Policy + audit (trust required) |
+| Provider-side user correlation | Not mitigated |
+| Metadata fingerprinting | Not mitigated |
 
 ### What This Does NOT Protect Against
 
-- Malicious relay operator (requires trust)
+- Malicious gateway operator (requires trust)
 - Content-based fingerprinting (if content is unique enough)
-- Legal compulsion of relay operator
-- Side-channel attacks on relay infrastructure
+- Legal compulsion of the gateway operator
+- Side-channel attacks on the gateway host
 - PII in content (user responsibility to scrub)
 
 ### Logging Policy
@@ -249,14 +202,11 @@ Contact Saqib.Khan@Me.com for Pro tier access.
 | Category | Policy | Retention | Rationale |
 |----------|--------|-----------|-----------|
 | Prompt/response content | Never persisted | N/A | Core privacy guarantee |
-| User<->request correlation | Not retained beyond session | N/A | Minimizes operational metadata |
 | Operational metrics | TBD | TBD | Error rates, latency (aggregate only) |
 | Security events | TBD | TBD | Auth failures, anomalies |
 | Provider routing | TBD | TBD | Which provider handled request (no content) |
 
-*Specific retention periods and operational logging scope to be defined during implementation. Session-scoped correlation (required for response routing) is ephemeral and not persisted.*
-
-**Jurisdictional Intent:** We plan to operate infrastructure in privacy-respecting jurisdictions with strong data protection laws and limited compelled disclosure regimes, to the extent commercially feasible. Specific jurisdictions to be determined.
+*Specific retention periods and operational logging scope to be defined during implementation.*
 
 ### Trust Boundaries
 
@@ -288,17 +238,14 @@ Contact Saqib.Khan@Me.com for Pro tier access.
 **Challenge:** Preventing abuse while minimizing what the gateway logs about users.
 
 **Approach:**
-- **Rate limiting:** Token-based limits without persistent identity correlation
+- **Rate limiting:** Token-based limits per tenant
 - **Content policy:** Provider-side content policies apply; the gateway's always-on PII scan inspects every request before it is forwarded, and the gateway does not otherwise moderate content
-- **Terms of Service:** Users agree to acceptable use; violations may result in token revocation
-- **Cryptographic accountability:** Privacy-preserving mechanisms (e.g., blind signatures) may enable revocation without identification
+- **Operator policy:** The operator of a deployment decides acceptable use and can revoke tenant keys
 
 **What we will NOT do:**
 - Content inspection or logging for abuse detection
 - User identification based on content patterns
 - Proactive monitoring of request content
-
-**Legal compliance:** We will respond to valid legal process in operating jurisdictions. See Transparency & Trust Commitments for warrant canary and disclosure policies.
 
 *Specific abuse prevention mechanisms to be finalized during implementation, balancing privacy preservation with operational necessity.*
 
@@ -310,7 +257,7 @@ Both Community and Pro editions are self-hosted.
 
 ### Self-Hosted
 
-Organization runs own relay:
+Organization runs its own gateway:
 - Full control over infrastructure
 - No external trust required
 - Data sovereignty / air-gap compliance
@@ -362,7 +309,7 @@ ZeroVeil can operate as an enterprise DLP proxy that intercepts and controls all
 
 **Egress routing:** requests go directly to LLM providers with DLP controls applied.
 
-**Key difference from Privacy Relay mode:** In Corporate Gateway mode, clients don't need to send attestation headers (`require_scrubbed_attestation` is disabled for simpler integration). **PII scanning is ALWAYS ON in both modes** — the gateway never relies on client attestation for security. This enables drop-in deployment where applications only need to change `OPENAI_API_BASE`.
+**Key difference from the attestation mode:** In Corporate Gateway mode, clients don't need to send attestation headers (`require_scrubbed_attestation` is disabled for simpler integration). **PII scanning is ALWAYS ON in both modes** — the gateway never relies on client attestation for security. This enables drop-in deployment where applications only need to change `OPENAI_API_BASE`.
 
 **Integration options:**
 
@@ -389,45 +336,19 @@ ZeroVeil Pro is architected to support major security frameworks:
 | ISO 27001/27701 | Information security + privacy management |
 | NIST CSF | US enterprise security baseline |
 | NIST AI RMF | AI-specific privacy and risk controls |
-| HIPAA | BAA support, PHI never reaches relay |
+| HIPAA | PHI never reaches the gateway when scrubbed client-side |
 | GDPR | Data minimization, DPA templates |
 
 See [docs/compliance.md](compliance.md) for detailed control mappings across all frameworks.
 
 **Regulatory notes:**
-- **HIPAA**: PHI must be scrubbed before reaching relay; consult qualified legal counsel for BAA requirements
+- **HIPAA**: PHI must be scrubbed before reaching the gateway; consult qualified legal counsel for BAA requirements
 - **GDPR**: Data minimization by design; processor agreements available
 - **CCPA**: User rights and disclosure procedures documented
 
 Note: By requiring local PII scrubbing, compliance burden is simplified — we are not a processor of personal data.
 
 ---
-
-## Transparency & Trust Commitments
-
-Policy commitments we intend to uphold from day one of operation:
-
-### Warrant Canary
-
-Where legally permitted in our operating jurisdictions, we will maintain a regularly updated warrant canary to signal whether we have received legal demands that we cannot disclose. Absence of update or removal of the canary should be treated as a potential compromise indicator.
-
-*Note: Warrant canary legality and effectiveness varies by jurisdiction. Users should understand the limitations of this mechanism in their specific legal context.*
-
-### Incident Response
-
-In the event of a security incident affecting user privacy:
-- Users will be notified promptly through published channels
-- Scope and nature of the incident will be disclosed to the extent legally permitted
-- Post-incident analysis will be published
-
-### Service Termination
-
-If ZeroVeil ceases operation:
-- Users will receive advance notice (minimum period TBD)
-- Any ephemeral data will be securely destroyed
-- Clear documentation of shutdown procedures will be provided
-
-*Specific procedures and timelines to be formalized before production launch.*
 
 ---
 
@@ -436,10 +357,7 @@ If ZeroVeil ceases operation:
 - Differential privacy for statistical queries
 - Formal verification of privacy properties (long-term goal, as resources permit)
 - Independent security audits
-- PII/PHI leak detection to identify insufficient or failed data scrubbing before relay
-- Transparency reports (periodic publication of aggregate statistics, legal request counts)
-- Source-available roadmap (timeline for code auditability)
-- Federated relay architecture (multiple trusted operators for distributed trust)
+- PII/PHI leak detection to identify insufficient or failed data scrubbing before it reaches the gateway
 - SDK enhancements: additional redaction backends, language support expansion
 
 ---

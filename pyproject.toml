@@ -7,6 +7,7 @@ name = "cortex1-zeroveil-community"
 version = "0.2.0"
 description = "Self-hosted LLM gateway: refuses prompts unless zero data retention is requested and redaction is attested; metadata-only audit log."
 requires-python = ">=3.11"
+license = { text = "PolyForm-Noncommercial-1.0.0 (plus PolyForm-Free-Trial-1.0.0 for 32-day commercial evaluation)" }
 dependencies = [
   "fastapi>=0.115",
   "requests>=2.31",

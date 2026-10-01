@@ -1,7 +1,6 @@
 # ZeroVeil Product Editions
 
-> Canonical edition definitions live in `zeroveil-gateway-pro/docs/editions.md`.
-> This file is the community repo summary. Keep in sync.
+> This file is the canonical edition summary. Pro features are available under a separate commercial license; contact Saqib.Khan@Me.com.
 
 This repository is the **Community Gateway**: the source-available, noncommercial enforcement core.
 
@@ -11,7 +10,8 @@ ZeroVeil ships two product lines:
 - **SDKs** (client-side libraries) — scrub PII locally before requests leave the client
 - **Gateways** (server-side proxies) — enforce policy and audit
 
-Community source is licensed under the PolyForm Noncommercial License 1.0.0, plus PolyForm Free Trial 1.0.0 (32-day commercial evaluation).
+Source-available under PolyForm Noncommercial 1.0.0. Free for personal, educational, nonprofit and government use; companies get a 32-day evaluation under PolyForm Free Trial 1.0.0 (LICENSE-FREE-TRIAL); any other commercial use needs a written license: see COMMERCIAL-LICENSE.md or write to Saqib.Khan@Me.com.
+
 Commercial, hosted, managed-service, customer-facing, internal business,
 revenue-generating, paid, or other monetized use requires a separate written
 commercial license.
@@ -86,6 +86,3 @@ Instead of intercepting ChatGPT/Claude traffic (requires TLS interception, break
 2. Deploy Open WebUI + ZeroVeil Gateway
 3. Employees use the replacement — works in any browser, including iPhone (PWA)
 
----
-
-*Keep in sync with `zeroveil-gateway-pro/docs/editions.md`.*

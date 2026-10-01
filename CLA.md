@@ -30,7 +30,7 @@ If You institute patent litigation against any entity alleging that the Project 
 
 You agree that the Licensor may distribute the Project (including Your Contributions):
 
-1) under the Project’s current license terms (currently PolyForm Noncommercial License 1.0.0, plus PolyForm Free Trial 1.0.0 (32-day commercial evaluation), as described in `LICENSE` and `LICENSE-FREE-TRIAL`),
+1) under the Project’s current license terms (currently PolyForm Noncommercial 1.0.0, plus PolyForm Free Trial 1.0.0 (32-day commercial evaluation) with nonprofit use free, as described in `LICENSE` and `LICENSE-FREE-TRIAL`),
 2) under any commercial license the Licensor offers for the Project (see `COMMERCIAL-LICENSE.md`), and
 3) under any later license terms the Licensor publishes for the Project.
 
@@ -50,7 +50,7 @@ Except for the representations in Section 5, You provide Your Contributions “A
 
 ## 7. How You Accept This CLA
 
-By submitting a Contribution to the Project, You agree to the terms of this Agreement. Acceptance is recorded by a Developer Certificate of Origin (DCO) `Signed-off-by:` line on each commit (e.g. via `git commit -s`).
+Acceptance is by DCO sign-off only. There is no separate signature. By adding a Developer Certificate of Origin (DCO) `Signed-off-by:` line to each commit (e.g. via `git commit -s`) when You submit a Contribution to the Project, You agree to the terms of this Agreement.
 
 A consistent handle plus a working email address is enough to sign off — your legal name is not required, and pseudonymous contributors are welcome.
 

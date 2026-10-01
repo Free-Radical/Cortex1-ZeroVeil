@@ -1,6 +1,6 @@
 # Contributing to Cortex1-ZeroVeil (Community Gateway)
 
-This repository is source-available under PolyForm Noncommercial 1.0.0 (`LICENSE`). We welcome contributions that improve safety, correctness, and adoption.
+This repository is source-available under PolyForm Noncommercial 1.0.0 (`LICENSE`), with a 32-day commercial evaluation under PolyForm Free Trial 1.0.0 (`LICENSE-FREE-TRIAL`); nonprofits use it free. We welcome contributions that improve safety, correctness, and adoption.
 
 ## Ground Rules (Safety + Claims)
 
@@ -10,11 +10,11 @@ This repository is source-available under PolyForm Noncommercial 1.0.0 (`LICENSE
 
 ## Contribution Requirements
 
-### 1) CLA (Required)
+### 1) Contribution terms (accepted by your DCO sign-off)
 
-Contributions are accepted under `CLA.md` (a license grant, you keep ownership) via a DCO `Signed-off-by` line. Pseudonymous handles are fine; we only need a consistent identity and a working email.
+Signing off your commits accepts the terms in `CLA.md` (a license grant; you keep ownership). There is no separate CLA signature. Pseudonymous handles are fine; we only need a consistent identity and a working email.
 
-### 2) Sign your commits (Required)
+### 2) Sign your commits (Required, the only acceptance step)
 
 Every commit needs a DCO sign-off:
 

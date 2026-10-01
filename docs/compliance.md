@@ -8,7 +8,7 @@ ZeroVeil Pro is architected to support enterprise compliance programs across maj
 
 | Framework | Focus Area | ZeroVeil Relevance |
 |-----------|------------|-------------------|
-| **HITRUST CSF** | Healthcare security | PHI never reaches relay (client scrubs) |
+| **HITRUST CSF** | Healthcare security | PHI never reaches the gateway (client scrubs) |
 | **SOC 2 Type II** | Service organization controls | Audit logging, access controls, availability |
 | **ISO 27001/27002** | Information security management | Comprehensive security controls |
 | **ISO 27701** | Privacy management | Privacy-by-design architecture |
@@ -16,7 +16,7 @@ ZeroVeil Pro is architected to support enterprise compliance programs across maj
 | **NIST AI RMF** | AI risk management | AI-specific privacy and security controls |
 | **HIPAA** | Healthcare privacy | Supports BAA requirements (PHI scrubbed client-side) |
 | **GDPR** | EU data protection | Data minimization, DPA support |
-| **FedRAMP** | Federal cloud security | On roadmap for government customers |
+| **FedRAMP** | Federal cloud security | Not certified |
 
 ---
 
@@ -49,7 +49,7 @@ How ZeroVeil addresses common control requirements across frameworks:
 | Encryption in transit | TLS 1.3 on all endpoints |
 | Encryption at rest | Encrypted database storage |
 | Data minimization | No prompt/response content stored |
-| PII handling | Client-side scrubbing (never touches relay) |
+| PII handling | Client-side scrubbing (never touches the gateway) |
 
 ### Incident Response
 
@@ -121,17 +121,9 @@ ZeroVeil Pro provides pre-built documentation packages for customer audits:
 
 ---
 
-## Certification Roadmap
+## Certifications
 
-| Certification | Status | Timeline |
-|---------------|--------|----------|
-| SOC 2 Type I | Planned | Post-revenue |
-| SOC 2 Type II | Planned | +6 months after Type I |
-| ISO 27001 | Planned | Post-SOC 2 |
-| HITRUST | Planned | Customer-driven |
-| FedRAMP | Future | Government contract dependent |
-
-*Note: ZeroVeil Pro is designed to support customers' compliance programs today. Formal certifications are on the roadmap pending scale.*
+ZeroVeil holds no formal certifications. It is designed to help customers meet their own compliance programs; it is not itself a certification.
 
 ---
 
@@ -141,7 +133,7 @@ ZeroVeil helps customers meet their own compliance requirements:
 
 | Customer Need | How ZeroVeil Helps |
 |---------------|-------------------|
-| "We need to use AI but can't send PII to cloud providers" | Client-side scrubbing + relay keeps PII in your environment |
+| "We need to use AI but can't send PII to cloud providers" | Client-side scrubbing + the gateway's PII rejection keep PII in your environment |
 | "We need audit trails for AI usage" | Metadata-only logging tracks usage without content |
 | "We need to prove AI providers don't retain our data" | ZDR-only routing with provider verification |
 | "We need SOC 2 evidence for our AI tools" | Compliance evidence bundles for your auditors |

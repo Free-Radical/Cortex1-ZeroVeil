@@ -30,7 +30,7 @@ ZeroVeil is a privacy-focused LLM gateway that enforces policy gates (ZDR-only i
 
 - **Upstream visibility of submitted content**: upstream providers still receive whatever the client sends; client-side scrubbing is required.
 - **A malicious/compromised gateway operator or host**: host access can bypass checks, capture traffic, or change logging behavior.
-- **Traffic analysis and timing correlation**: network metadata can still correlate requests; mixing/batching is not part of the v0/v1 implementation.
+- **Traffic analysis and timing correlation**: network metadata can still correlate requests; ZeroVeil does no batching or timing obfuscation.
 - **Client compromise and app-layer attacks**: malware/key theft, prompt injection, and content moderation are out of scope for the gateway.
 
 ## Trust Model
@@ -89,7 +89,7 @@ ZeroVeil sits between clients and upstream providers and enforces “safe-to-rel
 
 ## Threats NOT Addressed (Non-Goals)
 
-- Traffic analysis / timing attacks (not addressed; no mixer is built or scheduled)
+- Traffic analysis / timing attacks (not addressed)
 - Malicious gateway operator (self-host or trust)
 - Client-side malware (out of scope)
 - Upstream provider collusion (trust boundary)
@@ -129,7 +129,7 @@ For corporate gateway mode to be effective:
 ## Abuse Cases
 
 - **High-volume abuse and key guessing**: rate limiting reduces impact, but operators should monitor 401/429 spikes in `logs/audit.jsonl`.
-- **Using the relay for prohibited content**: the gateway does not moderate; acceptable use and downstream controls remain operator responsibility.
+- **Using the gateway for prohibited content**: the gateway does not moderate; acceptable use and downstream controls remain operator responsibility.
 - **Tenant attribution games**: avoid legacy mode in production; rely on authenticated tenant id.
 
 ## Security Recommendations
