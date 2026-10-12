@@ -31,7 +31,7 @@
   `docs/migration-cortex1-tier-escalation.md`, and all references to them.
 - Removed pointers to private repositories from README and docs/editions.md;
   this repository is canonical.
-- Repository links point to `https://github.com/ZeroVeilAI/zeroveil`; added
+- Repository links point to `https://github.com/Free-Radical/Cortex1-ZeroVeil`; added
   `site/index.html` as the project's static landing page.
 - `pyproject.toml`: version 0.2.0, updated project description, added
   `[project.urls]` (Homepage, Repository).
